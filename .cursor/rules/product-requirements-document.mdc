@@ -1,0 +1,475 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Product Requirements Document: pouring.at
+
+## Document Control
+**Document Status:** Draft  
+**Version:** 0.1  
+**Last Updated:** March 29, 2025  
+**Owner:** Dan Billson
+
+## Executive Summary
+Pouring.at is a mobile and web application designed to help craft beer enthusiasts discover and track their beer experiences. The platform connects users with local craft beer bars, providing up-to-date tap lists, personalized recommendations, and a social rating system. It serves three main user groups: beer enthusiasts looking for their next favorite beer, bar owners wanting to showcase their offerings and analyze performance, and breweries seeking customer feedback and market insights.
+
+## Problem Statement
+Craft beer enthusiasts often struggle to find venues that serve beers matching their preferences, especially when visiting new locations. There's currently no centralized platform that provides real-time information about craft beer availability across different bars, along with personalized recommendations based on taste preferences. Additionally, bar owners lack tools to efficiently manage tap lists and analyze performance data, while breweries have limited visibility into consumer reception of their products across different venues.
+
+## Target Users
+
+### Beer Enthusiasts
+- Craft beer lovers looking to discover new venues and beers
+- Travelers exploring craft beer scenes in unfamiliar locations
+- Social drinkers who enjoy rating and tracking their beer experiences
+- Beer aficionados who want personalized recommendations based on their taste preferences
+
+### Bar Owners
+- Craft beer bar managers and owners who want to showcase their rotating tap lists
+- Venue operators seeking analytics on beer performance and customer preferences
+- Hospitality businesses looking to attract craft beer enthusiasts
+
+### Breweries
+- Craft beer producers wanting customer feedback on their products
+- Brewery marketing teams seeking performance data across different venues
+- Product developers looking for insights on popular styles and trends
+
+## Project Phases
+The development of pouring.at will follow an iterative approach with four distinct phases, each building upon the previous phase's foundation.
+
+### Phase 1: Exploration Platform
+Focus on creating the core database and exploration functionality:
+- User account creation and authentication system
+- Ability for users to add and browse bars, breweries, and beers
+- Location-based search for bars
+- Basic tap list creation and management
+- Simple search functionality by beer style, brewery, or bar name
+- Mobile-responsive web application
+
+### Phase 2: User Profiles & Social Features
+Expand with personal tracking and social features:
+- Enhanced user profiles to track beer history
+- Check-in system to record visits to bars
+- Beer rating and review functionality
+- Activity feed showing friends' check-ins and ratings
+- Photo uploads for beers and venues
+- Notification system for new beers from favorite breweries/bars
+
+### Phase 3: Business Dashboards
+Add tools for business users:
+- Bar owner dashboards with tap list management
+- Analytics for bar owners (views, visits, popular beers)
+- Brewery profiles with performance metrics
+- Keg turnover tracking and ROI analysis
+- Customer demographic insights
+- Integration with inventory systems (optional)
+
+### Phase 4: Advanced Recommendations
+Implement AI-powered recommendation features:
+- Personalized bar recommendations based on user preferences
+- Beer style recommendations based on past ratings
+- Trend analysis for breweries and bars
+- "Beer genome" mapping for sophisticated taste matching
+- Predictive analytics for seasonal preferences
+
+## Product Requirements
+
+### Functional Requirements
+
+#### Phase 1: Exploration Platform
+
+**User Account System**
+- User registration with username, email, and password
+- Secure authentication system
+- User profile page showing activity
+- Permission levels for regular users and business owners
+
+**Bar Management**
+- Create, read, update, delete (CRUD) operations for bars
+- Required bar data: name, unique slug, address, geographic coordinates
+- Verification status (community-added vs. claimed by owner)
+- Tap list management interface
+- Photo uploads for venue
+
+**Brewery Management**
+- CRUD operations for breweries
+- Required brewery data: name, unique slug, address, geographic coordinates
+- Verification status (community-added vs. claimed by owner)
+- Associated beers listing
+- Brand assets management
+
+**Beer Catalog**
+- CRUD operations for beers
+- Required beer data: name, brewery, style, ABV, description
+- Optional beer data: hop varieties, notable ingredients (for future recommendation engine)
+- Beer availability tracking at specific bars
+- Image upload capability
+
+**Search and Discovery**
+- Location-based search for nearby bars (geolocation)
+- Filter by beer style
+- Filter by brewery
+- Combined search (e.g., "IPA bars within 1 mile")
+- Sort by distance, popularity, or recently updated
+- Responsive map interface showing bar locations
+
+### Non-Functional Requirements
+
+#### Performance
+- Initial system should support at least 100 concurrent users
+- Page load times under 3 seconds for primary functions
+- Responsive design optimized for various screen sizes
+
+#### Platform Support
+- Phase 1: Web application (responsive design)
+- Future phases: Native mobile applications (iOS and Android)
+
+#### Technology Stack
+- Frontend: Next.js framework
+- Backend: Node.js/Express API
+- Database: PostgreSQL for initial implementation
+- Future scaling considerations:
+  - Graph database (Neo4j) for social features (friends, likes, check-ins)
+  - Vector database (Pinecone) for recommendation engine
+  - Potential migration to microservices architecture
+
+#### Security
+- Standard user authentication and authorization
+- Secure storage of user credentials (hashed passwords)
+- HTTPS/TLS for all connections
+- Protection against common web vulnerabilities (XSS, CSRF, SQL injection)
+
+#### Scalability
+- Initial monolithic architecture with considerations for future modularization
+- Database design that allows for horizontal scaling
+- Plan for gradual migration to more specialized databases as user base grows
+
+#### Availability
+- Initial target of 99% uptime
+- Monitoring system for service health
+- Backup and recovery procedures
+
+### User Stories
+
+#### Phase 1: Exploration Platform
+
+**Beer Enthusiasts**
+- As a beer enthusiast, I want to find nearby craft beer bars so that I can discover new venues.
+- As a beer enthusiast, I want to see what beers are currently on tap at a specific bar so that I can decide if I want to visit.
+- As a beer enthusiast, I want to add a new bar to the system so that others can discover it.
+- As a beer enthusiast, I want to update a bar's tap list so that others have current information.
+- As a beer enthusiast, I want to search for bars by beer style so that I can find places serving my preferred types of beer.
+- As a beer enthusiast, I want to search for bars serving beers from specific breweries so that I can taste their offerings.
+
+**Bar Owners** (Limited in Phase 1)
+- As a bar owner, I want to claim my bar's listing so that I can ensure information is accurate.
+- As a bar owner, I want to update my tap list so that customers have current information.
+
+**Breweries** (Limited in Phase 1)
+- As a brewery representative, I want to claim my brewery's listing so that I can ensure information is accurate.
+- As a brewery representative, I want to add/update our beer catalog so that bars and users have accurate information.
+
+## Technical Specifications
+
+### Technology Stack
+- **Framework**: Next.js
+- **Hosting**: Vercel
+- **Database**: Supabase (PostgreSQL)
+- **ORM**: Drizzle
+- **Authentication**: BetterAuth
+- **Email Service**: Resend (https://new.email/)
+- **Form Management**: TanStack Form
+- **UI Components**: shadcn/ui
+- **Payment Processing**: polar.sh
+- **File Upload**: uploadthing
+- **Mapping**: react-google-maps (https://github.com/visgl/react-google-maps)
+- **Native Mobile** (future phases): Expo + React Native
+
+### Database Schema Relationships
+- **Brewery**: Can have many beers
+- **Beer**: Belongs to one brewery
+- **Bar**: Can have many taps
+- **Tap**: Belongs to one bar and can have one beer
+- **Check-in**: Consists of a bar and a beer
+- **Toast**: Consists of a check-in and a user
+
+### Data Models
+
+#### User
+- ID (PK)
+- Username
+- Email
+- Password (hashed)
+- Created At
+- Updated At
+
+#### Bar
+- ID (PK)
+- Name
+- Slug (unique)
+- Address
+- Latitude/Longitude
+- Verified status
+- Created At
+- Updated At
+- Created By (FK: User)
+
+#### Brewery
+- ID (PK)
+- Name
+- Slug (unique)
+- Address
+- Latitude/Longitude
+- Verified status
+- Created At
+- Updated At
+- Created By (FK: User)
+
+#### Beer
+- ID (PK)
+- Name
+- Brewery ID (FK)
+- Style
+- ABV
+- Description
+- Hops (array)
+- Notable ingredients (array)
+- Created At
+- Updated At
+- Created By (FK: User)
+
+#### Tap
+- ID (PK)
+- Bar ID (FK)
+- Beer ID (FK)
+- Added At
+- Updated At
+- Updated By (FK: User)
+
+#### Check-in (Phase 2)
+- ID (PK)
+- User ID (FK)
+- Beer ID (FK)
+- Bar ID (FK)
+- Rating
+- Review text
+- Created At
+
+#### Toast (Phase 2)
+- ID (PK)
+- User ID (FK)
+- Check-in ID (FK)
+- Created At
+
+### API Integrations
+- Google Maps API for location services and mapping
+- Supabase for database and storage
+- Resend for transactional emails
+- polar.sh for payment processing (future phases)
+
+### Deployment Architecture
+- Vercel for hosting the Next.js application
+- Supabase for database and authentication services
+- CI/CD through Vercel's GitHub integration
+- Future considerations for serverless functions to handle background processing
+
+## Design Requirements
+
+### Design Philosophy
+- Minimal and sleek design aesthetic
+- Clean UI inspired by Notion's interface
+- Visual elements reminiscent of traditional beer tap boards with changeable letters
+- Mobile-first approach for all features
+- Focus on readability and usability in bar environments (potentially dim lighting)
+
+### UI/UX Priorities
+- **Mobile optimization**: All features must be fully functional and intuitive on mobile devices
+- **Performance**: Fast loading times, especially for tap lists and search results
+- **Accessibility**: Ensure readability and navigation in various environments
+- **Simplicity**: Clear information hierarchy with minimal UI clutter
+- **Consistency**: Unified design language across all features
+
+### Key Design Elements
+- Typography inspired by tap board lettering for headers
+- Clean, high-contrast text for readability
+- Visual representation of beers that highlights key attributes (ABV, style)
+- Map interface for location-based discovery
+- Tap list design that resembles physical tap boards
+
+### Responsive Design Requirements
+- Fluid layouts that adapt to different screen sizes
+- Touch-friendly interface with appropriate tap targets
+- Critical functions accessible without horizontal scrolling on mobile
+- Desktop experience that takes advantage of additional screen real estate
+
+### Color Palette
+- Base palette of neutral colors for the interface (whites, grays, blacks)
+- Strategic use of accent colors for categorization (beer styles, ratings)
+- High contrast for readability in various lighting conditions
+
+### Iconography
+- Custom beer-themed icons for navigation and features
+- Consistent icon style throughout the application
+- Icons should be recognizable at small sizes on mobile devices
+
+## Success Metrics
+
+### Phase 1 Launch Goals (First 3 Months)
+- **User Acquisition**: 
+  - 500 registered users
+  - 50 daily active users (DAU)
+  - 200 monthly active users (MAU)
+- **Content Creation**:
+  - 100 bars added to the platform
+  - 50 breweries added to the platform
+  - 500 beers added to the catalog
+- **Engagement**:
+  - 10 tap list updates per day on average
+  - Average session time of 3+ minutes
+  - 30% of users return within one week
+
+### Growth Metrics (6-12 Months)
+- **User Base**:
+  - 2,000 registered users
+  - 150 daily active users
+  - 600 monthly active users
+- **Geographic Coverage**:
+  - Complete coverage in 3-5 target cities
+  - At least 50% of craft beer bars in those cities listed
+- **Retention**:
+  - 40% of users active month-over-month
+  - 25% of users contributing content (adding/updating bars, beers, etc.)
+
+### Platform Health
+- 99% uptime
+- Average page load time under 2 seconds
+- Less than 5 reported bugs per week
+- Database query performance under 500ms for common operations
+
+### Business Metrics (Future Phases)
+- 10% of listed bars claimed by actual owners
+- 5 verified brewery accounts
+- Average of 3 updates per week by business accounts
+
+### Qualitative Success Factors
+- Positive user feedback on the discovery experience
+- Users reporting they found new bars through the platform
+- Early adoption by influential craft beer community members
+- Mentions in local craft beer communities or publications
+
+## Timeline and Milestones
+
+### Phase 1 Development Schedule
+
+**Target Launch Date: May 1, 2025**
+
+#### Week 1-2 (April 1-14, 2025)
+- Project setup and environment configuration
+- Database schema design and implementation
+- Authentication system setup
+- Basic user registration and profile functionality
+
+#### Week 3 (April 15-21, 2025)
+- Bar and brewery entity creation
+- Beer catalog implementation
+- Location-based search functionality
+- Google Maps integration
+
+#### Week 4 (April 22-28, 2025)
+- Tap list management implementation
+- Search filters (by style, brewery)
+- UI polish and responsive design improvements
+- Testing and bug fixes
+
+#### Launch Week (April 29 - May 1, 2025)
+- Final QA and performance testing
+- Deployment to production
+- Monitoring system setup
+- Official launch
+
+### Key Milestones
+
+- **April 7**: Database schema finalized and ORM models implemented
+- **April 14**: User authentication system complete
+- **April 21**: Core data entities (bars, breweries, beers) implemented with basic CRUD operations
+- **April 28**: Search functionality and tap list management complete
+- **May 1**: Official product launch
+
+### Post-Launch Activities (May 2025)
+
+- Bug fixes and performance optimizations based on user feedback
+- Data seeding for key craft beer locations
+- Community outreach to early adopters
+- Begin planning for Phase 2 features
+
+## Risks and Mitigations
+
+### Development Risks
+
+**Time Constraints**
+- **Risk**: Limited development time could impact feature completeness by the target launch date.
+- **Mitigation**: 
+  - Prioritize core features that deliver the minimum viable product
+  - Break down tasks into smaller, manageable components
+  - Consider a soft launch approach with a limited feature set if necessary
+  - Maintain a clear scope boundary for Phase 1 to prevent feature creep
+
+**Technology Integration Issues**
+- **Risk**: Challenges with integrating third-party tools and services could cause delays.
+- **Mitigation**:
+  - Conduct early proof-of-concept tests for critical integrations
+  - Have fallback options identified for key third-party dependencies
+  - Allocate additional buffer time for complex integrations
+  - Document integration issues and solutions for future reference
+
+**Development Environment Challenges**
+- **Risk**: Issues with development tools like Cursor could impact productivity.
+- **Mitigation**:
+  - Maintain alternative development environment setups
+  - Use version control effectively to prevent loss of work
+  - Document development workflows to ensure consistency
+
+### Business and Product Risks
+
+**Data Quality**
+- **Risk**: Inaccurate or outdated tap lists could undermine user trust.
+- **Mitigation**:
+  - Implement a date stamp for when information was last updated
+  - Create a simple process for users to flag outdated information
+  - Design a verification process for user-contributed data
+
+**User Adoption**
+- **Risk**: Insufficient initial content could create a poor first impression.
+- **Mitigation**:
+  - Seed the platform with data for popular craft beer bars before launch
+  - Focus initial marketing on specific geographic areas to build density
+  - Identify and engage potential power users early
+
+**Competitive Landscape**
+- **Risk**: Similar applications may exist or emerge in the market.
+- **Mitigation**:
+  - Focus on unique differentiators in the product
+  - Prioritize features that aren't well-served by existing solutions
+  - Monitor competitive landscape and adjust strategy accordingly
+
+## Appendix
+
+### Glossary of Terms
+- **Tap List**: The current selection of draft beers available at a bar
+- **Check-in**: A user action of recording and optionally rating a beer consumed at a specific location
+- **Toast**: Similar to a "like" - a way for users to show appreciation for another user's check-in
+- **Verified**: A status indicating that a bar or brewery profile is managed by an authorized representative
+
+### Future Considerations (Beyond Phase 4)
+- Integration with point-of-sale systems for real-time tap updates
+- Event listings for beer festivals, tap takeovers, and brewery tours
+- Beer trading marketplace
+- International expansion with localization
+- API for third-party developers
+
+### References
+- Next.js Documentation: https://nextjs.org/docs
+- Supabase Documentation: https://supabase.com/docs
+- React Google Maps: https://github.com/visgl/react-google-maps
+- shadcn/ui Components: https://ui.shadcn.com
