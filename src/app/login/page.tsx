@@ -1,6 +1,5 @@
-import { Beer } from "lucide-react";
-
 import { LoginForm } from "@/components/login-form";
+import { Beer } from "lucide-react";
 
 export default function LoginPage() {
   return (

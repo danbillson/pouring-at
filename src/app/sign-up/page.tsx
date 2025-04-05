@@ -1,6 +1,5 @@
-import { Beer } from "lucide-react";
-
 import { SignUpForm } from "@/components/sign-up-form";
+import { Beer } from "lucide-react";
 
 export default function SignUpPage() {
   return (
