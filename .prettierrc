@@ -9,5 +9,8 @@
   "endOfLine": "lf",
   "bracketSameLine": false,
   "quoteProps": "as-needed",
-  "plugins": ["@ianvs/prettier-plugin-sort-imports"]
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ]
 }
