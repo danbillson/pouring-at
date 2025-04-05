@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { signUp } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -45,12 +46,17 @@ export function SignUpForm() {
     },
   });
 
-  async function onSubmit(data: SignUpValues) {
+  async function onSubmit({ email, password, username }: SignUpValues) {
     try {
       setError(undefined);
-      // TODO: Implement sign up logic
+      await signUp.email({
+        email,
+        password,
+        name: username,
+        callbackURL: "/",
+      });
       router.push("/");
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Please try again.");
     }
   }
@@ -116,7 +122,11 @@ export function SignUpForm() {
               />
             </div>
             {error && <div className="text-destructive text-sm">{error}</div>}
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               Sign up
             </Button>
             <div className="text-center text-sm">
