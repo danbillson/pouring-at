@@ -1,0 +1,64 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Technology Stack
+
+This document outlines the tools and technologies used in the pouring.at application.
+
+## Package Management
+- **pnpm** is our package manager of choice
+- Use `pnpm add [package]` to install dependencies
+- Use `pnpm dlx [package]` for one-off commands (like shadcn/ui)
+
+## Framework
+- **Next.js** with App Router
+- Use server components by default
+- Only add `"use client"` when necessary for interactivity
+- Use React Server Actions for form submissions
+
+## Database
+- **Supabase** PostgreSQL for data storage
+- Use Row-Level Security (RLS) for data protection
+
+## ORM
+- **Drizzle** for type-safe database access
+- Define schemas in `db/schema.ts`
+- Create migrations with `npx drizzle-kit generate`
+- Access database through `db/index.ts`
+
+## Authentication
+- **BetterAuth** for user authentication
+- Implement auth logic in `lib/auth.ts`
+- User session management via Next.js middleware
+
+## Email
+- **Resend** for transactional emails
+- Email templates in `emails/`
+- Send emails through the Resend client in `lib/email.ts`
+
+## Forms
+- **react-hook-form** for form state management
+- Use with **zod** for validation
+
+## UI Components
+- **shadcn/ui** for all UI components
+- Install new components with `pnpm dlx shadcn@latest add [component]`
+- Customize theme in `app/globals.css`
+
+## Payments
+- **polar.sh** for payment processing
+- Configure in `lib/payments.ts`
+- Implement webhooks in `app/api/webhooks/polar/route.ts`
+
+## File Storage
+- **Supabase Storage** for file uploads and storage
+- Configure buckets and permissions in Supabase dashboard
+- Access via the Supabase client in `lib/supabase.ts`
+
+## Guidelines
+- Keep server and client code separate
+- Minimize client components for better performance
+- Use TypeScript for all code
+- Follow the folder structure in the repository
