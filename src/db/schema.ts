@@ -1,4 +1,11 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  geometry,
+  index,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -49,3 +56,25 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at"),
   updatedAt: timestamp("updated_at"),
 });
+
+export const bar = pgTable(
+  "bar",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug"),
+
+    addressLine1: text("address_line1"),
+    addressLine2: text("address_line2"),
+    city: text("city"),
+    postcode: text("postcode"),
+    formattedAddress: text("formatted_address"),
+
+    location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
+
+    verified: boolean("verified").notNull().default(false),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
+  },
+  (table) => [index("bar_location_idx").using("gist", table.location)]
+);
