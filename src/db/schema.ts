@@ -5,7 +5,9 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -60,21 +62,23 @@ export const verification = pgTable("verification", {
 export const bar = pgTable(
   "bar",
   {
-    id: text("id").primaryKey(),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
     name: text("name").notNull(),
     slug: text("slug"),
-
     addressLine1: text("address_line1"),
     addressLine2: text("address_line2"),
     city: text("city"),
     postcode: text("postcode"),
     formattedAddress: text("formatted_address"),
-
     location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
-
     verified: boolean("verified").notNull().default(false),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
-  (table) => [index("bar_location_idx").using("gist", table.location)]
+  (table) => [
+    index("bar_location_idx").using("gist", table.location),
+    unique("bar_slug_unique").on(table.slug),
+  ]
 );
