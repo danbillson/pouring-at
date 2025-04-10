@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { bar } from "@/db/schema";
+import { geocodeAddress } from "@/lib/geocoding";
 import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -17,13 +18,15 @@ export async function POST(request: Request) {
     const json = await request.json();
     const body = createBarSchema.parse(json);
 
-    // TODO: Geocoding integration
-    // const { lat, lng } = await geocodeAddress({
-    //   addressLine1: body.addressLine1,
-    //   addressLine2: body.addressLine2,
-    //   city: body.city,
-    //   postcode: body.postcode,
-    // });
+    const { lat, lng } = await geocodeAddress({
+      addressLine1: body.addressLine1,
+      addressLine2: body.addressLine2,
+      city: body.city,
+      postcode: body.postcode,
+    }).catch((error) => {
+      console.error("Failed to geocode address:", error);
+      throw new Error("Failed to find address");
+    });
 
     const slug = body.name
       .toLowerCase()
@@ -37,8 +40,7 @@ export async function POST(request: Request) {
       addressLine2: body.addressLine2 || null,
       city: body.city,
       postcode: body.postcode,
-      // Temporary: Setting a dummy location in London
-      location: sql`ST_SetSRID(ST_Point(-0.1276, 51.5074), 4326)`,
+      location: sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`,
       formattedAddress: `${body.addressLine1}${
         body.addressLine2 ? `, ${body.addressLine2}` : ""
       }, ${body.city}, ${body.postcode}`,

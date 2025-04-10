@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.1",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
