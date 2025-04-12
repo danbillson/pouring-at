@@ -1,13 +1,13 @@
 interface PageProps {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 }
 
-export default function BarPage({ params }: PageProps) {
+export default async function BarPage({ params }: PageProps) {
+  const { slug } = await params;
+
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold">Bar: {params.slug}</h1>
+      <h1 className="text-2xl font-bold">Bar: {slug}</h1>
     </div>
   );
 }
