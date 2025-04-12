@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Archivo_Narrow } from "next/font/google";
 import "./globals.css";
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${archivoNarrow.variable} antialiased`}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

@@ -11,6 +11,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -20,20 +21,37 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const createBarSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens"
+    ),
   addressLine1: z.string().min(1, "Address is required"),
   addressLine2: z.string().optional(),
   city: z.string().min(1, "City is required"),
   postcode: z
     .string()
     .min(1, "Postcode is required")
-    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, "Invalid UK postcode format"),
+    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
+      message: "Invalid UK postcode format",
+    }),
 });
 
 type CreateBarValues = z.infer<typeof createBarSchema>;
+
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 
 export function CreateBarForm() {
   const router = useRouter();
@@ -41,12 +59,16 @@ export function CreateBarForm() {
     resolver: zodResolver(createBarSchema),
     defaultValues: {
       name: "",
+      slug: "",
       addressLine1: "",
       addressLine2: "",
       city: "",
       postcode: "",
     },
   });
+
+  const name = form.watch("name");
+  const suggestedSlug = generateSlug(name);
 
   async function onSubmit(data: CreateBarValues) {
     try {
@@ -58,11 +80,11 @@ export function CreateBarForm() {
 
       if (!response.ok) throw new Error("Failed to create bar");
 
-      router.push("/bars");
+      router.push(`/bars/${data.slug}`);
       router.refresh();
     } catch (error) {
       console.error("Failed to create bar:", error);
-      // TODO: Add error handling UI
+      toast.error("Failed to create bar");
     }
   }
 
@@ -82,8 +104,47 @@ export function CreateBarForm() {
                 <FormItem>
                   <FormLabel>Bar Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Mikkeller Bar London" {...field} />
+                    <Input
+                      placeholder="Mikkeller Bar London"
+                      autoComplete="off"
+                      {...field}
+                      onBlur={() => {
+                        if (form.getValues("slug") === "") {
+                          form.setValue("slug", generateSlug(field.value));
+                        }
+                      }}
+                    />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="mikkeller-bar-london"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  {name && (
+                    <FormDescription className="flex items-center gap-2">
+                      Suggested:{" "}
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-sm"
+                        type="button"
+                        onClick={() => form.setValue("slug", suggestedSlug)}
+                      >
+                        {suggestedSlug}
+                      </Button>
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -95,7 +156,11 @@ export function CreateBarForm() {
                 <FormItem>
                   <FormLabel>Address Line 1</FormLabel>
                   <FormControl>
-                    <Input placeholder="2-4 Hackney Road" {...field} />
+                    <Input
+                      placeholder="2-4 Hackney Road"
+                      autoComplete="off"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,7 +173,7 @@ export function CreateBarForm() {
                 <FormItem>
                   <FormLabel>Address Line 2 (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="" {...field} />
+                    <Input placeholder="" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +186,7 @@ export function CreateBarForm() {
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input placeholder="London" {...field} />
+                    <Input placeholder="London" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,7 +199,7 @@ export function CreateBarForm() {
                 <FormItem>
                   <FormLabel>Postcode</FormLabel>
                   <FormControl>
-                    <Input placeholder="E2 7NS" {...field} />
+                    <Input placeholder="E2 7NS" autoComplete="off" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
