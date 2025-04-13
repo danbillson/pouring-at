@@ -7,6 +7,13 @@ import { z } from "zod";
 
 const createBarSchema = z.object({
   name: z.string().min(1),
+  slug: z
+    .string()
+    .min(1)
+    .regex(
+      /^[a-z0-9-]+$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens"
+    ),
   addressLine1: z.string().min(1),
   addressLine2: z.string().optional(),
   city: z.string().min(1),
@@ -28,14 +35,16 @@ export async function POST(request: Request) {
       throw new Error("Failed to find address");
     });
 
-    const slug = body.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+    if (!lat || !lng) {
+      return NextResponse.json(
+        { error: "Failed to find address" },
+        { status: 422 }
+      );
+    }
 
     await db.insert(bar).values({
       name: body.name,
-      slug,
+      slug: body.slug,
       addressLine1: body.addressLine1,
       addressLine2: body.addressLine2 || null,
       city: body.city,
