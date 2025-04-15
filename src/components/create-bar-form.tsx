@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createBar } from "@/lib/bars";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -72,19 +73,18 @@ export function CreateBarForm() {
 
   async function onSubmit(data: CreateBarValues) {
     try {
-      const response = await fetch("/api/bars/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const result = await createBar(data);
 
-      if (!response.ok) throw new Error("Failed to create bar");
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
       router.push(`/bars/${data.slug}`);
-      router.refresh();
     } catch (error) {
       console.error("Failed to create bar:", error);
-      toast.error("Failed to create bar");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create bar"
+      );
     }
   }
 

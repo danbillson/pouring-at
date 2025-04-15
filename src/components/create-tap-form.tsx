@@ -18,8 +18,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createTap } from "@/lib/taps";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -37,7 +37,6 @@ interface CreateTapFormProps {
 }
 
 export function CreateTapForm({ barId, trigger }: CreateTapFormProps) {
-  const router = useRouter();
   const form = useForm<CreateTapValues>({
     resolver: zodResolver(createTapSchema),
     defaultValues: {
@@ -48,15 +47,12 @@ export function CreateTapForm({ barId, trigger }: CreateTapFormProps) {
 
   async function onSubmit(data: CreateTapValues) {
     try {
-      const response = await fetch("/api/taps/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const result = await createTap(data.barId, data.beerId);
 
-      if (!response.ok) throw new Error("Failed to create tap");
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
-      router.refresh();
       toast.success("Beer added to tap list");
     } catch (error) {
       console.error("Failed to create tap:", error);

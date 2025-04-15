@@ -1,7 +1,5 @@
 import { TapList } from "@/components/tap-list";
-import { db } from "@/db";
-import { bar } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getBar } from "@/lib/bars";
 import { notFound } from "next/navigation";
 
 export default async function BarPage({
@@ -10,8 +8,7 @@ export default async function BarPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const [barData] = await db.select().from(bar).where(eq(bar.slug, slug));
+  const barData = await getBar(slug);
 
   if (!barData) {
     notFound();
