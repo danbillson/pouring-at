@@ -1,3 +1,4 @@
+import { CreateTapForm } from "@/components/create-tap-form";
 import { Button } from "@/components/ui/button";
 import { getTaps } from "@/lib/taps";
 
@@ -6,13 +7,16 @@ export async function TapList({ barId }: { barId: string }) {
 
   return (
     <div className="mt-8">
-      <h2 className="mb-4 text-2xl font-bold">Tap list</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Tap list</h2>
+        <CreateTapForm barId={barId} />
+      </div>
       {taps.length === 0 ? (
         <div className="bg-muted grid place-items-center rounded-md px-6 py-12">
           <p className="text-muted-foreground mb-6">
             No beers currently on tap
           </p>
-          <Button>Add a beer</Button>
+          <CreateTapForm barId={barId} />
         </div>
       ) : (
         <div className="space-y-4">
