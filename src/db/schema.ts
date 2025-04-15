@@ -1,5 +1,6 @@
 import {
   boolean,
+  decimal,
   geometry,
   index,
   pgTable,
@@ -81,4 +82,63 @@ export const bar = pgTable(
     index("bar_location_idx").using("gist", table.location),
     unique("bar_slug_unique").on(table.slug),
   ]
+);
+
+export const brewery = pgTable(
+  "brewery",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    name: text("name").notNull(),
+    slug: text("slug"),
+    addressLine1: text("address_line1"),
+    addressLine2: text("address_line2"),
+    city: text("city"),
+    postcode: text("postcode"),
+    formattedAddress: text("formatted_address"),
+    location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
+    verified: boolean("verified").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("brewery_location_idx").using("gist", table.location),
+    unique("brewery_slug_unique").on(table.slug),
+  ]
+);
+
+export const beer = pgTable("beer", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  name: text("name").notNull(),
+  breweryId: text("brewery_id")
+    .notNull()
+    .references(() => brewery.id, { onDelete: "cascade" }),
+  abv: decimal("abv", { precision: 3, scale: 1 }),
+  style: text("style"),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const tap = pgTable(
+  "tap",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    barId: text("bar_id")
+      .notNull()
+      .references(() => bar.id, { onDelete: "cascade" }),
+    beerId: text("beer_id")
+      .notNull()
+      .references(() => beer.id, { onDelete: "cascade" }),
+    tappedOn: timestamp("tapped_on").notNull().defaultNow(),
+    tappedOff: timestamp("tapped_off"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [unique("tap_bar_beer_unique").on(table.barId, table.beerId)]
 );
