@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { Archivo_Narrow } from "next/font/google";
+import { Archivo } from "next/font/google";
 import "./globals.css";
 
-const archivoNarrow = Archivo_Narrow({
-  variable: "--font-archivo-narrow",
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
 });
 
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${archivoNarrow.variable} antialiased`}>
+      <body className={`${archivo.variable} antialiased`}>
         {children}
         <Toaster />
       </body>
