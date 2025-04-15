@@ -1,5 +1,6 @@
 "use client";
 
+import { BeerSearch } from "@/components/beer-search";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -84,11 +85,7 @@ export function CreateTapForm({ barId, trigger }: CreateTapFormProps) {
                 <FormItem>
                   <FormLabel>Beer</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Search for a beer..."
-                      autoComplete="off"
-                      {...field}
-                    />
+                    <BeerSearch value={field.value} onChange={field.onChange} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
