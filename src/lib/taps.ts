@@ -29,6 +29,18 @@ export async function getTaps(barId: string) {
 
 export async function createTap(barId: string, beerId: string) {
   try {
+    const existingTap = await db
+      .select()
+      .from(tap)
+      .where(
+        and(eq(tap.barId, barId), eq(tap.beerId, beerId), isNull(tap.tappedOff))
+      )
+      .limit(1);
+
+    if (existingTap.length > 0) {
+      return { success: false, error: "This beer is already on tap" };
+    }
+
     await db.insert(tap).values({
       barId,
       beerId,

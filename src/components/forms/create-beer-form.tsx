@@ -84,6 +84,11 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
         breweryId,
       });
 
+      if (!result.success || !result.beer) {
+        toast.error(result.error);
+        return;
+      }
+
       toast.success(`Created ${data.name} by ${data.brewery.name}`);
       onSuccess?.(result.beer.id);
     } catch (error) {
@@ -114,6 +119,14 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
                   />
                 </FormControl>
                 <FormMessage />
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-muted-foreground ml-auto inline-block w-fit p-0 underline"
+                  onClick={() => setNewBrewery(false)}
+                >
+                  Search for existing brewery
+                </Button>
               </FormItem>
             )}
           />

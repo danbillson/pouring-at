@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -16,7 +15,7 @@ import {
 import type { Beer } from "@/lib/beers";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface BeerSearchProps {
@@ -37,6 +36,15 @@ async function searchBeers(search: string) {
   return data.beers as Beer[];
 }
 
+async function getBeer(id: string) {
+  const response = await fetch(`/api/beers/${id}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch beer");
+  }
+  const data = await response.json();
+  return data.beer as Beer;
+}
+
 export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -45,6 +53,12 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
     queryKey: ["beers", debouncedSearch],
     queryFn: () => searchBeers(debouncedSearch),
     enabled: debouncedSearch.length > 0,
+  });
+
+  const { data: selectedBeer } = useQuery({
+    queryKey: ["beer", value],
+    queryFn: () => getBeer(value!),
+    enabled: !!value,
   });
 
   const setSearchDebouncer = useAsyncDebouncer(
@@ -72,7 +86,9 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
           className="w-full justify-between"
         >
           {value
-            ? (beers.find((beer) => beer.id === value)?.name ?? value)
+            ? (selectedBeer?.name ??
+              beers.find((beer) => beer.id === value)?.name ??
+              "Loading...")
             : "Select beer..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -86,26 +102,6 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
             }}
           />
           <CommandList>
-            <CommandEmpty>
-              {!debouncedSearch ? (
-                <span>Enter a beer name to search for.</span>
-              ) : (
-                <div className="grid place-items-center gap-2">
-                  <span>No beers found.</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-fit"
-                    onClick={() => {
-                      onCreateNew?.();
-                      setOpen(false);
-                    }}
-                  >
-                    Add a new beer
-                  </Button>
-                </div>
-              )}
-            </CommandEmpty>
             {beers.map((beer) => (
               <CommandItem
                 key={beer.id}
@@ -115,14 +111,23 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
                   setOpen(false);
                 }}
               >
-                {beer.name}
                 {beer.brewery?.name && (
                   <span className="text-muted-foreground">
                     {beer.brewery.name}
                   </span>
                 )}
+                {beer.name}
               </CommandItem>
             ))}
+            <CommandItem
+              onSelect={() => {
+                onCreateNew?.();
+                setOpen(false);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add a new beer
+            </CommandItem>
           </CommandList>
         </Command>
       </PopoverContent>

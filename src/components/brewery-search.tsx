@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Command,
-  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -16,7 +15,7 @@ import {
 import type { Brewery } from "@/lib/breweries";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface BrewerySearchProps {
@@ -96,24 +95,6 @@ export function BrewerySearch({
           />
 
           <CommandList>
-            <CommandEmpty>
-              {!debouncedSearch ? (
-                <span>Enter a brewery name to search for.</span>
-              ) : (
-                <div className="grid place-items-center gap-2 p-4">
-                  <span>No breweries found.</span>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setOpen(false);
-                      onCreateNew?.();
-                    }}
-                  >
-                    Create new brewery
-                  </Button>
-                </div>
-              )}
-            </CommandEmpty>
             {breweries.map((brewery) => (
               <CommandItem
                 key={brewery.id}
@@ -130,6 +111,15 @@ export function BrewerySearch({
                 {brewery.name}
               </CommandItem>
             ))}
+            <CommandItem
+              onSelect={() => {
+                onCreateNew?.();
+                setOpen(false);
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Add a new brewery
+            </CommandItem>
           </CommandList>
         </Command>
       </PopoverContent>

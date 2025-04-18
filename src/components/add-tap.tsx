@@ -52,7 +52,10 @@ export function AddTap({ barId, trigger }: AddTapProps) {
           <CreateTapForm
             barId={barId}
             defaultBeerId={selectedBeerId}
-            onSuccess={() => setOpen(false)}
+            onSuccess={() => {
+              setOpen(false);
+              setSelectedBeerId("");
+            }}
             onCreateBeer={() => setShowCreateBeer(true)}
           />
         )}

@@ -49,7 +49,8 @@ export function CreateTapForm({
       const result = await createTap(data.barId, data.beerId);
 
       if (!result.success) {
-        throw new Error(result.error);
+        toast.error(result.error);
+        return;
       }
 
       toast.success("Beer added to tap list");

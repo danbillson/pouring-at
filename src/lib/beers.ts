@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { beer, brewery } from "@/db/schema";
-import { eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 
 export type Beer = {
   id: string;
@@ -45,6 +45,21 @@ export interface CreateBeerInput {
 
 export async function createBeer(input: CreateBeerInput) {
   try {
+    const existingBeer = await db
+      .select()
+      .from(beer)
+      .where(
+        and(eq(beer.name, input.name), eq(beer.breweryId, input.breweryId))
+      )
+      .limit(1);
+
+    if (existingBeer.length > 0) {
+      return {
+        success: false,
+        error: "A beer with this name already exists for this brewery",
+      };
+    }
+
     const [newBeer] = await db
       .insert(beer)
       .values({
@@ -56,9 +71,9 @@ export async function createBeer(input: CreateBeerInput) {
       })
       .returning();
 
-    return { beer: newBeer };
+    return { success: true, beer: newBeer };
   } catch (error) {
     console.error("Error creating beer:", error);
-    throw new Error("Failed to create beer");
+    return { success: false, error: "Failed to create beer" };
   }
 }
