@@ -22,9 +22,10 @@ import { useEffect, useState } from "react";
 interface BeerSearchProps {
   value?: string;
   onChange: (value: string) => void;
+  onCreateNew?: () => void;
 }
 
-export function BeerSearch({ value, onChange }: BeerSearchProps) {
+export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
   const [open, setOpen] = useState(false);
   const [beers, setBeers] = useState<Beer[]>([]);
   const [search, setSearch] = useState("");
@@ -68,7 +69,15 @@ export function BeerSearch({ value, onChange }: BeerSearchProps) {
             ) : (
               <div className="grid place-items-center gap-2">
                 <span>No beers found.</span>
-                <Button variant="outline" size="sm" className="w-fit">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  onClick={() => {
+                    onCreateNew?.();
+                    setOpen(false);
+                  }}
+                >
                   Add a new beer
                 </Button>
               </div>

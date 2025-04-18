@@ -1,6 +1,7 @@
 "use client";
 
 import { BeerSearch } from "@/components/beer-search";
+import { CreateBeerForm } from "@/components/forms/create-beer-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { createTap } from "@/lib/taps";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -37,6 +39,7 @@ interface CreateTapFormProps {
 }
 
 export function CreateTapForm({ barId, trigger }: CreateTapFormProps) {
+  const [showCreateBeer, setShowCreateBeer] = useState(false);
   const form = useForm<CreateTapValues>({
     resolver: zodResolver(createTapSchema),
     defaultValues: {
@@ -67,38 +70,56 @@ export function CreateTapForm({ barId, trigger }: CreateTapFormProps) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Beer to Tap List</DialogTitle>
+          <DialogTitle>
+            {showCreateBeer ? "Add New Beer" : "Add Beer to Tap List"}
+          </DialogTitle>
           <DialogDescription>
-            Enter the details of the beer to add to the tap list
+            {showCreateBeer
+              ? "Enter the details of the new beer"
+              : "Enter the details of the beer to add to the tap list"}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-6 space-y-6"
-          >
-            <FormField
-              control={form.control}
-              name="beerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Beer</FormLabel>
-                  <FormControl>
-                    <BeerSearch value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={form.formState.isSubmitting}
+        {showCreateBeer ? (
+          <CreateBeerForm
+            onSuccess={(beerId) => {
+              form.setValue("beerId", beerId);
+              setShowCreateBeer(false);
+            }}
+            onBack={() => setShowCreateBeer(false)}
+          />
+        ) : (
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="mt-6 space-y-6"
             >
-              {form.formState.isSubmitting ? "Adding..." : "Add Beer"}
-            </Button>
-          </form>
-        </Form>
+              <FormField
+                control={form.control}
+                name="beerId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beer</FormLabel>
+                    <FormControl>
+                      <BeerSearch
+                        value={field.value}
+                        onChange={field.onChange}
+                        onCreateNew={() => setShowCreateBeer(true)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Adding..." : "Add tap"}
+              </Button>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );

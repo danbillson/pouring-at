@@ -1,4 +1,4 @@
-import { SignUpForm } from "@/components/sign-up-form";
+import { SignUpForm } from "@/components/forms/sign-up-form";
 import { Beer } from "lucide-react";
 import Link from "next/link";
 
