@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -14,9 +14,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { Brewery } from "@/lib/breweries";
-import { searchBreweries } from "@/lib/breweries";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface BrewerySearchProps {
@@ -26,6 +26,18 @@ interface BrewerySearchProps {
   onCreateNew?: () => void;
 }
 
+async function searchBreweries(search: string) {
+  if (!search) return [];
+  const response = await fetch(
+    `/api/breweries/search?q=${encodeURIComponent(search)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch breweries");
+  }
+  const data = await response.json();
+  return data.breweries as Brewery[];
+}
+
 export function BrewerySearch({
   value,
   name,
@@ -33,20 +45,29 @@ export function BrewerySearch({
   onCreateNew,
 }: BrewerySearchProps) {
   const [open, setOpen] = useState(false);
-  const [breweries, setBreweries] = useState<Brewery[]>([]);
-  const [search, setSearch] = useState(name || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(name || "");
+
+  const { data: breweries = [] } = useQuery({
+    queryKey: ["breweries", debouncedSearch],
+    queryFn: () => searchBreweries(debouncedSearch),
+    enabled: debouncedSearch.length > 0,
+  });
+
+  const setSearchDebouncer = useAsyncDebouncer(
+    (value: string) => {
+      setDebouncedSearch(value);
+      onChange({ name: value });
+    },
+    {
+      wait: 300,
+    }
+  );
 
   useEffect(() => {
-    if (search.length > 0) {
-      const getBreweries = async () => {
-        const results = await searchBreweries(search);
-        setBreweries(results);
-      };
-      getBreweries();
-    } else {
-      setBreweries([]);
-    }
-  }, [search]);
+    return () => {
+      setSearchDebouncer.cancel();
+    };
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -60,41 +81,39 @@ export function BrewerySearch({
           {value
             ? (breweries.find((brewery) => brewery.id === value)?.name ??
               name ??
-              search)
+              debouncedSearch)
             : "Select brewery..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search breweries..."
-            value={search}
             onValueChange={(value) => {
-              setSearch(value);
-              onChange({ name: value });
+              setSearchDebouncer.maybeExecute(value);
             }}
           />
 
-          <CommandEmpty>
-            {!search ? (
-              <span>Enter a brewery name to search for.</span>
-            ) : (
-              <div className="grid place-items-center gap-2 p-4">
-                <span>No breweries found.</span>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setOpen(false);
-                    onCreateNew?.();
-                  }}
-                >
-                  Create new brewery
-                </Button>
-              </div>
-            )}
-          </CommandEmpty>
-          <CommandGroup>
+          <CommandList>
+            <CommandEmpty>
+              {!debouncedSearch ? (
+                <span>Enter a brewery name to search for.</span>
+              ) : (
+                <div className="grid place-items-center gap-2 p-4">
+                  <span>No breweries found.</span>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setOpen(false);
+                      onCreateNew?.();
+                    }}
+                  >
+                    Create new brewery
+                  </Button>
+                </div>
+              )}
+            </CommandEmpty>
             {breweries.map((brewery) => (
               <CommandItem
                 key={brewery.id}
@@ -102,27 +121,16 @@ export function BrewerySearch({
                 onSelect={(currentValue) => {
                   const selected =
                     currentValue === value
-                      ? { name: search }
+                      ? { name: debouncedSearch }
                       : { id: currentValue, name: brewery.name };
                   onChange(selected);
                   setOpen(false);
                 }}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === brewery.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
                 {brewery.name}
-                {brewery.formattedAddress && (
-                  <span className="text-muted-foreground ml-2">
-                    • {brewery.formattedAddress}
-                  </span>
-                )}
               </CommandItem>
             ))}
-          </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

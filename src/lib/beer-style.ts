@@ -46,6 +46,7 @@ export const beerStyles = {
   Blonde_and_Golden: ["Blonde Ale", "Golden Ale"],
   Stout: [
     "Stout",
+    "Nitro Stout",
     "Irish Dry Stout",
     "Milk Stout",
     "Oatmeal Stout",

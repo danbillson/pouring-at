@@ -21,9 +21,13 @@ export async function TapList({ barId }: { barId: string }) {
         <div className="space-y-4">
           {taps.map((tap) => (
             <div key={tap.id} className="flex flex-col">
-              <h3 className="font-medium">{tap.beer.name}</h3>
+              <h3 className="font-medium">
+                <span className="text-muted-foreground">
+                  {tap.brewery.name}{" "}
+                </span>
+                {tap.beer.name}
+              </h3>
               <div className="text-muted-foreground text-sm">
-                <p>{tap.brewery.name}</p>
                 <p>
                   {tap.beer.style}
                   {tap.beer.abv && ` • ${tap.beer.abv}%`}

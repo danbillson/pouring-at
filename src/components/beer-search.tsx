@@ -7,7 +7,6 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandLoading,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -42,7 +41,7 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const { data: beers = [], isLoading } = useQuery({
+  const { data: beers = [] } = useQuery({
     queryKey: ["beers", debouncedSearch],
     queryFn: () => searchBeers(debouncedSearch),
     enabled: debouncedSearch.length > 0,
@@ -107,7 +106,6 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
                 </div>
               )}
             </CommandEmpty>
-            {isLoading && <CommandLoading>Searching...</CommandLoading>}
             {beers.map((beer) => (
               <CommandItem
                 key={beer.id}
