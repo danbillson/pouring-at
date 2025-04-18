@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 interface BrewerySearchProps {
   value?: string;
   name?: string;
-  onChange: (value: { slug?: string; name: string }) => void;
+  onChange: (value: string) => void;
 }
 
 async function searchBreweries(search: string) {
@@ -67,7 +67,7 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
   const setSearchDebouncer = useAsyncDebouncer(
     (value: string) => {
       setDebouncedSearch(value);
-      onChange({ name: value });
+      onChange(value);
     },
     {
       wait: 300,
@@ -113,11 +113,7 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
                 key={brewery.slug}
                 value={brewery.slug}
                 onSelect={(currentValue) => {
-                  const selected =
-                    currentValue === value
-                      ? { name: debouncedSearch }
-                      : { slug: currentValue, name: brewery.name };
-                  onChange(selected);
+                  onChange(currentValue);
                   setOpen(false);
                 }}
               >
