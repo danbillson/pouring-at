@@ -34,3 +34,31 @@ export async function searchBeers(search: string) {
 
   return beers as Beer[];
 }
+
+export interface CreateBeerInput {
+  name: string;
+  style: string;
+  abv: number;
+  description?: string;
+  breweryId: string;
+}
+
+export async function createBeer(input: CreateBeerInput) {
+  try {
+    const [newBeer] = await db
+      .insert(beer)
+      .values({
+        name: input.name,
+        style: input.style,
+        abv: String(input.abv),
+        description: input.description,
+        breweryId: input.breweryId,
+      })
+      .returning();
+
+    return { beer: newBeer };
+  } catch (error) {
+    console.error("Error creating beer:", error);
+    throw new Error("Failed to create beer");
+  }
+}

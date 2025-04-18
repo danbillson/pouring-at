@@ -1,3 +1,6 @@
+"use client";
+
+import { BrewerySearch } from "@/components/brewery-search";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { beerStyles } from "@/lib/beer-style";
+import { createBeer } from "@/lib/beers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -52,9 +56,16 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
 
   async function onSubmit(data: CreateBeerValues) {
     try {
-      // TODO: Implement beer creation
+      const result = await createBeer({
+        name: data.name,
+        style: data.style,
+        abv: parseFloat(data.abv || "0"),
+        description: data.description,
+        breweryId: data.breweryId,
+      });
+
       toast.success("Beer created successfully");
-      onSuccess?.("new-beer-id");
+      onSuccess?.(result.beer.id);
     } catch (error) {
       console.error("Failed to create beer:", error);
       toast.error("Failed to create beer");
@@ -64,6 +75,20 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="breweryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Brewery</FormLabel>
+              <FormControl>
+                <BrewerySearch value={field.value} onChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="name"
