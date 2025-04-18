@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Command,
+  CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
@@ -15,14 +16,13 @@ import {
 import type { Brewery } from "@/lib/breweries";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface BrewerySearchProps {
   value?: string;
   name?: string;
-  onChange: (value: { id?: string; name: string }) => void;
-  onCreateNew?: () => void;
+  onChange: (value: { slug?: string; name: string }) => void;
 }
 
 async function searchBreweries(search: string) {
@@ -37,14 +37,18 @@ async function searchBreweries(search: string) {
   return data.breweries as Brewery[];
 }
 
-// The BrewerySearch component is used to search for breweries by name with
+async function getBrewery(slug: string) {
+  const response = await fetch(`/api/breweries/${slug}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch brewery");
+  }
+  const data = await response.json();
+  return data.brewery as Brewery;
+}
+
+// The BrewerySelect component is used to search for breweries by slug without
 // the option to create a new brewery.
-export function BrewerySearch({
-  value,
-  name,
-  onChange,
-  onCreateNew,
-}: BrewerySearchProps) {
+export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState(name || "");
 
@@ -52,6 +56,12 @@ export function BrewerySearch({
     queryKey: ["breweries", debouncedSearch],
     queryFn: () => searchBreweries(debouncedSearch),
     enabled: debouncedSearch.length > 0,
+  });
+
+  const { data: selectedBrewery } = useQuery({
+    queryKey: ["brewery", value],
+    queryFn: () => getBrewery(value!),
+    enabled: !!value,
   });
 
   const setSearchDebouncer = useAsyncDebouncer(
@@ -80,9 +90,10 @@ export function BrewerySearch({
           className="w-full justify-between"
         >
           {value
-            ? (breweries.find((brewery) => brewery.id === value)?.name ??
+            ? (selectedBrewery?.name ??
+              breweries.find((brewery) => brewery.slug === value)?.name ??
               name ??
-              debouncedSearch)
+              "Loading...")
             : "Select brewery..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -95,17 +106,17 @@ export function BrewerySearch({
               setSearchDebouncer.maybeExecute(value);
             }}
           />
-
+          <CommandEmpty>No breweries found.</CommandEmpty>
           <CommandList>
             {breweries.map((brewery) => (
               <CommandItem
-                key={brewery.id}
-                value={brewery.id}
+                key={brewery.slug}
+                value={brewery.slug}
                 onSelect={(currentValue) => {
                   const selected =
                     currentValue === value
                       ? { name: debouncedSearch }
-                      : { id: currentValue, name: brewery.name };
+                      : { slug: currentValue, name: brewery.name };
                   onChange(selected);
                   setOpen(false);
                 }}
@@ -113,15 +124,6 @@ export function BrewerySearch({
                 {brewery.name}
               </CommandItem>
             ))}
-            <CommandItem
-              onSelect={() => {
-                onCreateNew?.();
-                setOpen(false);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Add a new brewery
-            </CommandItem>
           </CommandList>
         </Command>
       </PopoverContent>
