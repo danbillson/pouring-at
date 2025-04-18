@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
+  CommandLoading,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -14,9 +15,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { Beer } from "@/lib/beers";
-import { searchBeers } from "@/lib/beers";
-import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface BeerSearchProps {
@@ -25,20 +26,44 @@ interface BeerSearchProps {
   onCreateNew?: () => void;
 }
 
+async function searchBeers(search: string) {
+  if (!search) return [];
+  const response = await fetch(
+    `/api/beers/search?q=${encodeURIComponent(search)}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch beers");
+  }
+  const data = await response.json();
+  return data.beers as Beer[];
+}
+
 export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
   const [open, setOpen] = useState(false);
-  const [beers, setBeers] = useState<Beer[]>([]);
-  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const { data: beers = [], isLoading } = useQuery({
+    queryKey: ["beers", debouncedSearch],
+    queryFn: () => searchBeers(debouncedSearch),
+    enabled: debouncedSearch.length > 0,
+  });
+
+  console.log(beers);
+
+  const setSearchDebouncer = useAsyncDebouncer(
+    (value: string) => {
+      setDebouncedSearch(value);
+    },
+    {
+      wait: 300,
+    }
+  );
 
   useEffect(() => {
-    if (search.length > 0) {
-      const getBeers = async () => {
-        const results = await searchBeers(search);
-        setBeers(results);
-      };
-      getBeers();
-    }
-  }, [search]);
+    return () => {
+      setSearchDebouncer.cancel();
+    };
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,12 +84,12 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
         <Command>
           <CommandInput
             placeholder="Search beers..."
-            value={search}
-            onValueChange={setSearch}
+            onValueChange={(value) => {
+              setSearchDebouncer.maybeExecute(value);
+            }}
           />
-
           <CommandEmpty>
-            {!search ? (
+            {!debouncedSearch ? (
               <span>Enter a beer name to search for.</span>
             ) : (
               <div className="grid place-items-center gap-2">
@@ -83,7 +108,8 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
               </div>
             )}
           </CommandEmpty>
-          <CommandGroup>
+          <CommandList>
+            {isLoading && <CommandLoading>Searching...</CommandLoading>}
             {beers.map((beer) => (
               <CommandItem
                 key={beer.id}
@@ -93,16 +119,15 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
                   setOpen(false);
                 }}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === beer.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
                 {beer.name}
+                {beer.brewery?.name && (
+                  <span className="text-muted-foreground">
+                    {beer.brewery.name}
+                  </span>
+                )}
               </CommandItem>
             ))}
-          </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

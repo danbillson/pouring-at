@@ -84,7 +84,7 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
         breweryId,
       });
 
-      toast.success("Beer created successfully");
+      toast.success(`Created ${data.name} by ${data.brewery.name}`);
       onSuccess?.(result.beer.id);
     } catch (error) {
       console.error("Failed to create beer:", error);

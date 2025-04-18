@@ -1,3 +1,4 @@
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
@@ -20,8 +21,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          crossOrigin="anonymous"
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+        />
+      </head>
       <body className={`${archivo.variable} antialiased`}>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>
