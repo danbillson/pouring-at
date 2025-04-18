@@ -1,8 +1,8 @@
 "use client";
 
+import { BarMap } from "@/components/bar-map";
 import { SearchForm } from "@/components/forms/search-form";
 import { Card } from "@/components/ui/card";
-import { Map } from "@vis.gl/react-google-maps";
 import { useQueryState } from "nuqs";
 import { useMemo } from "react";
 
@@ -51,12 +51,7 @@ export default function SearchPage() {
 
           {location && (
             <div className="h-[600px] w-full">
-              <Map
-                defaultZoom={13}
-                center={mapCenter}
-                gestureHandling={"greedy"}
-                style={{ width: "100%", height: "100%" }}
-              />
+              <BarMap center={mapCenter} />
             </div>
           )}
         </div>
