@@ -1,5 +1,6 @@
 export const beerStyles = {
   IPA: [
+    "IPA",
     "American IPA",
     "West Coast IPA",
     "New England IPA",
@@ -10,8 +11,10 @@ export const beerStyles = {
     "Hazy IPA",
     "Imperial IPA",
     "Red IPA",
+    "Sour IPA",
   ],
   Lager: [
+    "Lager",
     "American Lager",
     "Munich Lager",
     "Dortmunder Export",
@@ -23,6 +26,7 @@ export const beerStyles = {
     "Light Lager",
   ],
   Pilsner: [
+    "Pilsner",
     "German Pilsner",
     "Czech Pilsner",
     "American Pilsner",
@@ -32,6 +36,7 @@ export const beerStyles = {
     "Classic Pilsner",
   ],
   Pale_Ale: [
+    "Pale Ale",
     "American Pale Ale",
     "English Pale Ale",
     "Australian Pale Ale",
@@ -40,6 +45,7 @@ export const beerStyles = {
   ],
   Blonde_and_Golden: ["Blonde Ale", "Golden Ale"],
   Stout: [
+    "Stout",
     "Irish Dry Stout",
     "Milk Stout",
     "Oatmeal Stout",
@@ -50,11 +56,13 @@ export const beerStyles = {
     "Russian Imperial Stout",
   ],
   Porter: [
+    "Porter",
     "English Porter",
     "American Porter",
     "Baltic Porter",
     "Robust Porter",
     "Vanilla Porter",
+    "Imperial Porter",
   ],
   Wheat_Beer: [
     "Hefeweizen",
@@ -66,12 +74,16 @@ export const beerStyles = {
     "Fruited Wheat",
   ],
   Sour: [
+    "Sour",
+    "Wild Ale",
     "Gose",
     "Berliner Weisse",
     "American Wild Ale",
     "Lambic",
     "Oud Bruin",
     "Kettle Sour",
+    "Pastry Sour",
+    "Fruited Sour",
   ],
   Belgian: [
     "Belgian Tripel",

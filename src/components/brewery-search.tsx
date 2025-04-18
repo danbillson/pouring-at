@@ -21,18 +21,20 @@ import { useEffect, useState } from "react";
 
 interface BrewerySearchProps {
   value?: string;
-  onChange: (value: string) => void;
+  name?: string;
+  onChange: (value: { id?: string; name: string }) => void;
   onCreateNew?: () => void;
 }
 
 export function BrewerySearch({
   value,
+  name,
   onChange,
   onCreateNew,
 }: BrewerySearchProps) {
   const [open, setOpen] = useState(false);
   const [breweries, setBreweries] = useState<Brewery[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(name || "");
 
   useEffect(() => {
     if (search.length > 0) {
@@ -56,7 +58,9 @@ export function BrewerySearch({
           className="w-full justify-between"
         >
           {value
-            ? (breweries.find((brewery) => brewery.id === value)?.name ?? value)
+            ? (breweries.find((brewery) => brewery.id === value)?.name ??
+              name ??
+              search)
             : "Select brewery..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -66,25 +70,26 @@ export function BrewerySearch({
           <CommandInput
             placeholder="Search breweries..."
             value={search}
-            onValueChange={setSearch}
+            onValueChange={(value) => {
+              setSearch(value);
+              onChange({ name: value });
+            }}
           />
 
           <CommandEmpty>
             {!search ? (
               <span>Enter a brewery name to search for.</span>
             ) : (
-              <div className="grid place-items-center gap-2">
+              <div className="grid place-items-center gap-2 p-4">
                 <span>No breweries found.</span>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="w-fit"
                   onClick={() => {
-                    onCreateNew?.();
                     setOpen(false);
+                    onCreateNew?.();
                   }}
                 >
-                  Add a new brewery
+                  Create new brewery
                 </Button>
               </div>
             )}
@@ -95,7 +100,11 @@ export function BrewerySearch({
                 key={brewery.id}
                 value={brewery.id}
                 onSelect={(currentValue) => {
-                  onChange(currentValue === value ? "" : currentValue);
+                  const selected =
+                    currentValue === value
+                      ? { name: search }
+                      : { id: currentValue, name: brewery.name };
+                  onChange(selected);
                   setOpen(false);
                 }}
               >

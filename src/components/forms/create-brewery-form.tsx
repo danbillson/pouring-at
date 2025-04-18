@@ -18,17 +18,22 @@ import { z } from "zod";
 
 const createBrewerySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  addressLine1: z.string().optional(),
+  addressLine1: z.string().min(1, "Address is required"),
   addressLine2: z.string().optional(),
-  city: z.string().optional(),
-  postcode: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  postcode: z
+    .string()
+    .min(1, "Postcode is required")
+    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
+      message: "Invalid UK postcode format",
+    }),
 });
 
 type CreateBreweryValues = z.infer<typeof createBrewerySchema>;
 
 interface CreateBreweryFormProps {
   onSuccess?: (breweryId: string) => void;
-  onCancel?: () => void;
+  onCancel: () => void;
 }
 
 export function CreateBreweryForm({
@@ -58,7 +63,9 @@ export function CreateBreweryForm({
       onSuccess?.(result.data.id);
     } catch (error) {
       console.error("Failed to create brewery:", error);
-      toast.error("Failed to create brewery");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create brewery"
+      );
     }
   }
 
@@ -86,7 +93,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>Address Line 1</FormLabel>
               <FormControl>
-                <Input placeholder="Enter address line 1" {...field} />
+                <Input placeholder="Enter address" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,9 +105,12 @@ export function CreateBreweryForm({
           name="addressLine2"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address Line 2</FormLabel>
+              <FormLabel>Address Line 2 (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Enter address line 2" {...field} />
+                <Input
+                  placeholder="Enter additional address details"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -135,7 +145,7 @@ export function CreateBreweryForm({
           )}
         />
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-4">
           <Button
             type="submit"
             className="w-full"
@@ -143,16 +153,9 @@ export function CreateBreweryForm({
           >
             {form.formState.isSubmitting ? "Creating..." : "Create Brewery"}
           </Button>
-          {onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          )}
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
         </div>
       </form>
     </Form>

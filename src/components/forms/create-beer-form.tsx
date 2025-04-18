@@ -22,14 +22,19 @@ import {
 } from "@/components/ui/select";
 import { beerStyles } from "@/lib/beer-style";
 import { createBeer } from "@/lib/beers";
+import { createBrewery } from "@/lib/breweries";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 const createBeerSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  breweryId: z.string().min(1, "Brewery is required"),
+  brewery: z.object({
+    id: z.string().optional(),
+    name: z.string().min(1, "Brewery is required"),
+  }),
   style: z.string().min(1, "Style is required"),
   abv: z.string().optional(),
   description: z.string().optional(),
@@ -43,11 +48,14 @@ interface CreateBeerFormProps {
 }
 
 export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
+  const [newBrewery, setNewBrewery] = useState(false);
   const form = useForm<CreateBeerValues>({
     resolver: zodResolver(createBeerSchema),
     defaultValues: {
       name: "",
-      breweryId: "",
+      brewery: {
+        name: "",
+      },
       style: "",
       abv: "",
       description: "",
@@ -56,38 +64,79 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
 
   async function onSubmit(data: CreateBeerValues) {
     try {
+      let breweryId = data.brewery.id;
+
+      if (!breweryId) {
+        const result = await createBrewery({ name: data.brewery.name });
+
+        if (!result.success || !result.data) {
+          throw new Error(result.error || "Failed to create brewery");
+        }
+
+        breweryId = result.data.id;
+      }
+
       const result = await createBeer({
         name: data.name,
         style: data.style,
         abv: parseFloat(data.abv || "0"),
         description: data.description,
-        breweryId: data.breweryId,
+        breweryId,
       });
 
       toast.success("Beer created successfully");
       onSuccess?.(result.beer.id);
     } catch (error) {
       console.error("Failed to create beer:", error);
-      toast.error("Failed to create beer");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create beer"
+      );
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="breweryId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Brewery</FormLabel>
-              <FormControl>
-                <BrewerySearch value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {newBrewery ? (
+          <FormField
+            control={form.control}
+            name="brewery"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Brewery</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter brewery name"
+                    value={field.value.name}
+                    onChange={(e) => {
+                      field.onChange({ name: e.target.value });
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormField
+            control={form.control}
+            name="brewery"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Brewery</FormLabel>
+                <FormControl>
+                  <BrewerySearch
+                    value={field.value.id}
+                    name={field.value.name}
+                    onChange={field.onChange}
+                    onCreateNew={() => setNewBrewery(true)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
