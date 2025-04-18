@@ -1,5 +1,4 @@
 import { CreateTapForm } from "@/components/create-tap-form";
-import { Button } from "@/components/ui/button";
 import { getTaps } from "@/lib/taps";
 
 export async function TapList({ barId }: { barId: string }) {
