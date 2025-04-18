@@ -48,8 +48,6 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
     enabled: debouncedSearch.length > 0,
   });
 
-  console.log(beers);
-
   const setSearchDebouncer = useAsyncDebouncer(
     (value: string) => {
       setDebouncedSearch(value);
@@ -81,34 +79,34 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
-        <Command>
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search beers..."
             onValueChange={(value) => {
               setSearchDebouncer.maybeExecute(value);
             }}
           />
-          <CommandEmpty>
-            {!debouncedSearch ? (
-              <span>Enter a beer name to search for.</span>
-            ) : (
-              <div className="grid place-items-center gap-2">
-                <span>No beers found.</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  onClick={() => {
-                    onCreateNew?.();
-                    setOpen(false);
-                  }}
-                >
-                  Add a new beer
-                </Button>
-              </div>
-            )}
-          </CommandEmpty>
           <CommandList>
+            <CommandEmpty>
+              {!debouncedSearch ? (
+                <span>Enter a beer name to search for.</span>
+              ) : (
+                <div className="grid place-items-center gap-2">
+                  <span>No beers found.</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    onClick={() => {
+                      onCreateNew?.();
+                      setOpen(false);
+                    }}
+                  >
+                    Add a new beer
+                  </Button>
+                </div>
+              )}
+            </CommandEmpty>
             {isLoading && <CommandLoading>Searching...</CommandLoading>}
             {beers.map((beer) => (
               <CommandItem
