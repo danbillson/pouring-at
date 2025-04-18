@@ -47,6 +47,12 @@ This document outlines the tools and technologies used in the pouring.at applica
 - Install new components with `pnpm dlx shadcn@latest add [component]`
 - Customize theme in `app/globals.css`
 
+## Animations
+- **motion/react** for motion and animations
+- Use `import { motion } from "motion/react"`
+- Animations should be used in places that cause a layout shift
+- Animations should feel natural and snappy
+
 ## Payments
 - **polar.sh** for payment processing
 - Configure in `lib/payments.ts`

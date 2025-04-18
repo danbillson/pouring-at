@@ -1,4 +1,4 @@
-import { CreateBarForm } from "@/components/create-bar-form";
+import { CreateBarForm } from "@/components/forms/create-bar-form";
 
 export default function NewBarPage() {
   return (
