@@ -1,11 +1,11 @@
 "use client";
 
+import { BarList } from "@/components/bars/bar-list";
+import { BarMap } from "@/components/bars/bar-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BarWithTaps } from "@/lib/bars";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { BarList } from "./bar-list";
-import { BarMap } from "./bar-map";
 
 type BarMapListProps = {
   location?: string;
@@ -60,13 +60,13 @@ export function BarMapList({ location, style, brewery }: BarMapListProps) {
   // Combined loading state for map and list
   if (isLoading || !data) {
     return (
-      <div className="grid h-full gap-8 lg:grid-cols-[1fr,400px]">
-        <Skeleton className="h-[600px] w-full" />
-        <div className="space-y-4">
+      <div className="grid h-full lg:grid-cols-[400px_1fr]">
+        <div className="space-y-4 pr-2">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
+        <Skeleton className="h-[600px] w-full" />
       </div>
     );
   }
