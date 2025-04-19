@@ -37,6 +37,8 @@ async function searchBreweries(search: string) {
   return data.breweries as Brewery[];
 }
 
+// The BrewerySearch component is used to search for breweries by name with
+// the option to create a new brewery.
 export function BrewerySearch({
   value,
   name,

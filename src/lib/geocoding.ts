@@ -24,3 +24,19 @@ export async function geocodeAddress(address: Address) {
   const { lat, lng } = response.data.results[0].geometry.location;
   return { lat, lng };
 }
+
+export async function geocodeLocation(location: string) {
+  const response = await client.geocode({
+    params: {
+      address: `${location}, UK`,
+      key: process.env.MAPS_API_KEY!,
+    },
+  });
+
+  if (response.data.results.length === 0) {
+    throw new Error("Location not found");
+  }
+
+  const { lat, lng } = response.data.results[0].geometry.location;
+  return { lat, lng };
+}

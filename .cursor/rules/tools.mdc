@@ -1,7 +1,7 @@
 ---
 description: 
-globs: 
-alwaysApply: true
+globs: *.ts*,*.css
+alwaysApply: false
 ---
 # Technology Stack
 
@@ -11,6 +11,7 @@ This document outlines the tools and technologies used in the pouring.at applica
 - **pnpm** is our package manager of choice
 - Use `pnpm add [package]` to install dependencies
 - Use `pnpm dlx [package]` for one-off commands (like shadcn/ui)
+- Do not add new packages without permission
 
 ## Framework
 - **Next.js** with App Router

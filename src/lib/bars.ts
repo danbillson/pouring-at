@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { bar } from "@/db/schema";
+import { bar, beer, brewery, tap } from "@/db/schema";
 import { geocodeAddress } from "@/lib/geocoding";
 import { eq, sql } from "drizzle-orm";
 
@@ -59,4 +59,102 @@ export async function createBar(data: CreateBarInput) {
     }
     return { success: false, error: "Failed to create bar" };
   }
+}
+
+type SearchParams = {
+  lat: number;
+  lng: number;
+  radius?: number; // in kilometers
+  style?: string;
+  brewery?: string;
+};
+
+export type BarWithTaps = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  distance_km: number;
+  taps: Array<{
+    beer: { id: string; name: string; style: string; abv: number };
+    brewery: { id: string; name: string };
+  }>;
+};
+
+export async function searchBars({
+  lat,
+  lng,
+  radius = 5, // Default 5km radius
+  style,
+  brewery: breweryName,
+}: SearchParams) {
+  const point = sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`;
+
+  const nearbyBars = sql`
+    WITH nearby_bars AS (
+      SELECT 
+        b.id AS bar_id,
+        b.name AS bar_name,
+        ST_Y(b.location::geometry) AS lat,
+        ST_X(b.location::geometry) AS lng,
+        ST_Distance(
+          b.location::geometry,
+          ${point}::geometry,
+          true  -- Use spheroid for more accurate distance
+        ) / 1000 AS distance_km
+      FROM ${bar} b
+      WHERE ST_DWithin(
+        b.location::geometry,
+        ${point}::geometry,
+        ${radius * 1000},  -- Convert km to meters
+        true  -- Use spheroid for more accurate distance
+      )
+    ),
+    matching_bars AS (
+      SELECT DISTINCT t.bar_id
+      FROM ${tap} t
+      INNER JOIN ${beer} be ON be.id = t.beer_id
+      INNER JOIN ${brewery} br ON br.id = be.brewery_id
+      WHERE t.tapped_off IS NULL
+      ${style ? sql`AND be.style = ${style}` : sql``}
+      ${breweryName ? sql`AND br.name = ${breweryName}` : sql``}
+    ),
+    bar_taps AS (
+      SELECT 
+        t.bar_id,
+        json_agg(
+          json_build_object(
+            'beer', json_build_object(
+              'id', be.id,
+              'name', be.name,
+              'style', be.style,
+              'abv', be.abv
+            ),
+            'brewery', json_build_object(
+              'id', br.id,
+              'name', br.name
+            )
+          )
+        ) AS taps
+      FROM ${tap} t
+      INNER JOIN ${beer} be ON be.id = t.beer_id
+      INNER JOIN ${brewery} br ON br.id = be.brewery_id
+      WHERE t.tapped_off IS NULL
+      GROUP BY t.bar_id
+    )
+    SELECT 
+      nb.bar_id AS id,
+      nb.bar_name AS name,
+      nb.lat,
+      nb.lng,
+      nb.distance_km,
+      COALESCE(bt.taps, '[]'::json) AS taps
+    FROM nearby_bars nb
+    ${style || breweryName ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
+    LEFT JOIN bar_taps bt ON bt.bar_id = nb.bar_id
+    ORDER BY nb.distance_km ASC
+    LIMIT 20
+  `;
+
+  return db.execute(nearbyBars) as Promise<BarWithTaps[]>;
 }
