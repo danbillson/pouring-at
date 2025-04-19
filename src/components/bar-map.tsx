@@ -1,19 +1,9 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import type { BarWithTaps } from "@/lib/bars";
 import { useQuery } from "@tanstack/react-query";
 import { Map, Marker } from "@vis.gl/react-google-maps";
-
-type Bar = {
-  id: string;
-  name: string;
-  lat: number;
-  lng: number;
-  taps: Array<{
-    beer: { id: string; name: string; style: string; abv: number };
-    brewery: { id: string; name: string };
-  }>;
-};
 
 type BarMapProps = {
   location?: string;
@@ -40,7 +30,7 @@ async function fetchBars(params: {
   }
   const data = await response.json();
   return {
-    bars: data.bars as Bar[],
+    bars: data.bars as BarWithTaps[],
     center: data.location as { lat: number; lng: number },
   };
 }

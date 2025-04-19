@@ -1,5 +1,6 @@
 "use client";
 
+import { BarList } from "@/components/bar-list";
 import { BarMap } from "@/components/bar-map";
 import { SearchForm } from "@/components/forms/search-form";
 import { useQueryState } from "nuqs";
@@ -25,7 +26,7 @@ export default function SearchPage() {
     <div className="min-h-screen">
       <div className="container mx-auto py-8">
         <div className="grid gap-8">
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto">
             <SearchForm
               defaultValues={{
                 location: location || "",
@@ -37,12 +38,21 @@ export default function SearchPage() {
           </div>
 
           {location && (
-            <div className="h-[600px] w-full">
-              <BarMap
-                location={location}
-                style={style || undefined}
-                brewery={brewery || undefined}
-              />
+            <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
+              <div className="h-[600px] w-full">
+                <BarMap
+                  location={location}
+                  style={style || undefined}
+                  brewery={brewery || undefined}
+                />
+              </div>
+              <div>
+                <BarList
+                  location={location}
+                  style={style || undefined}
+                  brewery={brewery || undefined}
+                />
+              </div>
             </div>
           )}
         </div>

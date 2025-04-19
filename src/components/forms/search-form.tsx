@@ -1,6 +1,6 @@
 "use client";
 
-import { BrewerySelect } from "@/components/brewery-select";
+import { BrewerySelect } from "@/components/search/brewery-select";
 import { Button } from "@/components/ui/button";
 import {
   Form,

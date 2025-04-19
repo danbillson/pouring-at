@@ -69,6 +69,18 @@ type SearchParams = {
   brewery?: string;
 };
 
+export type BarWithTaps = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  distance_km: number;
+  taps: Array<{
+    beer: { id: string; name: string; style: string; abv: number };
+    brewery: { id: string; name: string };
+  }>;
+};
+
 export async function searchBars({
   lat,
   lng,
@@ -144,5 +156,5 @@ export async function searchBars({
     LIMIT 20
   `;
 
-  return db.execute(nearbyBars);
+  return db.execute(nearbyBars) as Promise<BarWithTaps[]>;
 }

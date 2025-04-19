@@ -1,6 +1,6 @@
 "use client";
 
-import { BeerSearch } from "@/components/beer-search";
+import { BeerSearch } from "@/components/search/beer-search";
 import { Button } from "@/components/ui/button";
 import {
   Form,
