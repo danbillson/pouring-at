@@ -16,15 +16,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { lat, lng } = await geocodeLocation(location);
+    const coords = await geocodeLocation(location);
     const bars = await searchBars({
-      lat,
-      lng,
+      lat: coords.lat,
+      lng: coords.lng,
       style: style || undefined,
       brewery: brewery || undefined,
     });
 
-    return NextResponse.json({ bars, location: { lat, lng } });
+    return NextResponse.json({
+      bars,
+      location: coords,
+    });
   } catch (error) {
     console.error("Error fetching bars:", error);
     return NextResponse.json(

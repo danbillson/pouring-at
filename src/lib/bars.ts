@@ -72,11 +72,10 @@ type SearchParams = {
 export async function searchBars({
   lat,
   lng,
-  radius = 5,
+  radius = 5, // Default 5km radius
   style,
   brewery: breweryName,
 }: SearchParams) {
-  // Create a point from the search coordinates
   const point = sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`;
 
   const nearbyBars = sql`
@@ -85,9 +84,19 @@ export async function searchBars({
         b.id AS bar_id,
         b.name AS bar_name,
         ST_Y(b.location::geometry) AS lat,
-        ST_X(b.location::geometry) AS lng
+        ST_X(b.location::geometry) AS lng,
+        ST_Distance(
+          b.location::geometry,
+          ${point}::geometry,
+          true  -- Use spheroid for more accurate distance
+        ) / 1000 AS distance_km
       FROM ${bar} b
-      WHERE ST_DWithin(b.location::geometry, ${point}, ${radius * 1000})
+      WHERE ST_DWithin(
+        b.location::geometry,
+        ${point}::geometry,
+        ${radius * 1000},  -- Convert km to meters
+        true  -- Use spheroid for more accurate distance
+      )
     ),
     matching_bars AS (
       SELECT DISTINCT t.bar_id
@@ -126,10 +135,12 @@ export async function searchBars({
       nb.bar_name AS name,
       nb.lat,
       nb.lng,
+      nb.distance_km,
       COALESCE(bt.taps, '[]'::json) AS taps
     FROM nearby_bars nb
     ${style || breweryName ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
     LEFT JOIN bar_taps bt ON bt.bar_id = nb.bar_id
+    ORDER BY nb.distance_km ASC
     LIMIT 20
   `;
 

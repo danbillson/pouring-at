@@ -16,7 +16,6 @@ type Bar = {
 };
 
 type BarMapProps = {
-  center: { lat: number; lng: number };
   location?: string;
   style?: string;
   brewery?: string;
