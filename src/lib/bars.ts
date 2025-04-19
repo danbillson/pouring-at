@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { bar, beer, brewery, tap } from "@/db/schema";
 import { geocodeAddress } from "@/lib/geocoding";
-import { and, eq, isNull, sql, SQL } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export type CreateBarInput = {
   name: string;

@@ -2,7 +2,6 @@
 
 import { BarMap } from "@/components/bar-map";
 import { SearchForm } from "@/components/forms/search-form";
-import { Card } from "@/components/ui/card";
 import { useQueryState } from "nuqs";
 
 export default function SearchPage() {
@@ -26,7 +25,7 @@ export default function SearchPage() {
     <div className="min-h-screen">
       <div className="container mx-auto py-8">
         <div className="grid gap-8">
-          <Card className="mx-auto w-full max-w-lg p-4">
+          <div className="mx-auto max-w-2xl">
             <SearchForm
               defaultValues={{
                 location: location || "",
@@ -35,7 +34,7 @@ export default function SearchPage() {
               }}
               onSubmit={handleSearch}
             />
-          </Card>
+          </div>
 
           {location && (
             <div className="h-[600px] w-full">

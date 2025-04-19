@@ -49,15 +49,12 @@ export function SearchForm({ defaultValues, onSubmit }: SearchFormProps) {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="grid grid-cols-2 gap-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-4">
         <FormField
           control={form.control}
           name="location"
           render={({ field }) => (
-            <FormItem className="col-span-2">
+            <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
                 <Input placeholder="Enter town, city or postcode" {...field} />
@@ -118,7 +115,7 @@ export function SearchForm({ defaultValues, onSubmit }: SearchFormProps) {
           )}
         />
 
-        <Button type="submit" className="col-span-2 mt-2 ml-auto w-fit">
+        <Button type="submit" className="w-fit self-end">
           Search
         </Button>
       </form>
