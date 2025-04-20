@@ -77,7 +77,7 @@ export type BarWithTaps = {
   distance_km: number;
   taps: Array<{
     beer: { id: string; name: string; style: string; abv: number };
-    brewery: { id: string; name: string };
+    brewery: { id: string; name: string; slug: string };
   }>;
 };
 
@@ -86,7 +86,7 @@ export async function searchBars({
   lng,
   radius = 5, // Default 5km radius
   style,
-  brewery: breweryName,
+  brewery: brewerySlug,
 }: SearchParams) {
   const point = sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`;
 
@@ -117,7 +117,7 @@ export async function searchBars({
       INNER JOIN ${brewery} br ON br.id = be.brewery_id
       WHERE t.tapped_off IS NULL
       ${style ? sql`AND be.style = ${style}` : sql``}
-      ${breweryName ? sql`AND br.name = ${breweryName}` : sql``}
+      ${brewerySlug ? sql`AND br.slug = ${brewerySlug}` : sql``}
     ),
     bar_taps AS (
       SELECT 
@@ -132,7 +132,8 @@ export async function searchBars({
             ),
             'brewery', json_build_object(
               'id', br.id,
-              'name', br.name
+              'name', br.name,
+              'slug', br.slug
             )
           )
         ) AS taps
@@ -150,7 +151,7 @@ export async function searchBars({
       nb.distance_km,
       COALESCE(bt.taps, '[]'::json) AS taps
     FROM nearby_bars nb
-    ${style || breweryName ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
+    ${style || brewerySlug ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
     LEFT JOIN bar_taps bt ON bt.bar_id = nb.bar_id
     ORDER BY nb.distance_km ASC
     LIMIT 20
