@@ -1,3 +1,4 @@
+import { LocationInput } from "@/components/search/location-input";
 import { TextLoop } from "@/components/ui/text-loop";
 
 export default function Home() {
@@ -26,6 +27,13 @@ export default function Home() {
           tap lists, personalized recommendations based on your taste, and a map
           to guide you to your next perfect pint.
         </p>
+        <div className="mt-10 flex flex-col">
+          <h3 className="mb-2 text-lg font-bold">Find bars near you</h3>
+          <LocationInput
+            placeholder="Enter a town, city or postcode..."
+            className="bg-background h-10 px-4 py-2 pl-9 md:text-lg"
+          />
+        </div>
       </div>
     </div>
   );
@@ -33,7 +41,7 @@ export default function Home() {
 
 function Em({ children }: { children: React.ReactNode }) {
   return (
-    <span className="bg-foreground text-background inline-block -rotate-1">
+    <span className="bg-foreground text-background inline-block -rotate-1 rounded-sm px-1">
       {children}
     </span>
   );
