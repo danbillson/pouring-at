@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { beer, brewery } from "@/db/schema";
-import { eq, ilike, or } from "drizzle-orm";
+import { and, eq, ilike, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -10,6 +10,12 @@ export async function GET(request: Request) {
   if (!search || search.length < 1) {
     return NextResponse.json({ beers: [] });
   }
+
+  // Split search into words and create conditions for each word
+  const searchTerms = search.split(" ").filter(Boolean);
+  const conditions = searchTerms.map((term) =>
+    or(ilike(beer.name, `%${term}%`), ilike(brewery.name, `%${term}%`))
+  );
 
   const beers = await db
     .select({
@@ -21,9 +27,7 @@ export async function GET(request: Request) {
     })
     .from(beer)
     .leftJoin(brewery, eq(beer.breweryId, brewery.id))
-    .where(
-      or(ilike(beer.name, `%${search}%`), ilike(brewery.name, `%${search}%`))
-    )
+    .where(and(...conditions))
     .limit(10);
 
   return NextResponse.json({ beers });
