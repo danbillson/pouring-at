@@ -6,7 +6,7 @@ export async function TapList({ barId }: { barId: string }) {
 
   return (
     <div className="mt-8">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="bg-background mb-4 flex items-center justify-between rounded-lg p-4">
         <h2 className="text-2xl font-bold">Tap list</h2>
         <AddTap barId={barId} />
       </div>
@@ -18,7 +18,7 @@ export async function TapList({ barId }: { barId: string }) {
           <AddTap barId={barId} />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="bg-background space-y-4 rounded-lg p-4">
           {taps.map((tap) => (
             <div key={tap.id} className="flex flex-col">
               <h3 className="font-medium">
