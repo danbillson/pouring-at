@@ -47,11 +47,17 @@ export function LoginForm() {
   async function onSubmit({ email, password }: LoginValues) {
     try {
       setError(undefined);
-      await signIn.email({
+      const { error } = await signIn.email({
         email,
         password,
         callbackURL: "/",
       });
+
+      if (error) {
+        setError("Invalid email or password. Please try again.");
+        return;
+      }
+
       router.push("/");
     } catch {
       setError("Invalid email or password. Please try again.");

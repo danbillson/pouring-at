@@ -20,7 +20,7 @@ function getRelevantBeers(bar: BarWithTaps, style?: string, brewery?: string) {
     beers = beers.filter((tap) => tap.beer.style === style);
   }
   if (brewery) {
-    beers = beers.filter((tap) => tap.brewery.name === brewery);
+    beers = beers.filter((tap) => tap.brewery.slug === brewery);
   }
 
   // Prioritize beers matching the filters, then show others
