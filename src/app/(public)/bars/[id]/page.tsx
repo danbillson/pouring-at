@@ -5,10 +5,10 @@ import { notFound } from "next/navigation";
 export default async function BarPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }) {
-  const { slug } = await params;
-  const barData = await getBar(slug);
+  const { id } = await params;
+  const barData = await getBar(id);
 
   if (!barData) {
     notFound();
