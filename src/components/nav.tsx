@@ -12,11 +12,8 @@ export async function Nav() {
 
   return (
     <nav className="mx-auto flex w-full max-w-5xl items-center justify-between p-4">
-      <Link
-        href="/"
-        className="bg-muted rounded-lg px-2 py-1 text-xl font-bold"
-      >
-        pouring.at
+      <Link href="/" className="px-2 py-1 font-bold">
+        pouring<span className="text-amber-500">.</span>at
       </Link>
 
       <LocationInput />
