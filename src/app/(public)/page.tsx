@@ -1,7 +1,40 @@
+import { TextLoop } from "@/components/ui/text-loop";
+
 export default function Home() {
   return (
-    <div className="bg-muted grid min-h-screen p-8 pb-20 sm:p-20">
-      Coming soon
+    <div className="bg-muted m-2 grid min-h-[calc(100vh-84px)] rounded-lg p-8 pb-20 sm:p-20">
+      <div className="mx-auto w-full max-w-5xl">
+        <h1 className="text-2xl font-bold sm:text-4xl lg:text-6xl">
+          Searching for a{" "}
+          <TextLoop interval={3}>
+            <Em>Brown Ale</Em>
+            <Em>Porter</Em>
+            <Em>Sour</Em>
+            <Em>IPA</Em>
+          </TextLoop>
+          <br />
+          in{" "}
+          <TextLoop interval={3}>
+            <Em>Newcastle?</Em>
+            <Em>London?</Em>
+            <Em>Edinburgh?</Em>
+            <Em>Manchester?</Em>
+          </TextLoop>
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg">
+          We've got you covered. Find all of your favourite beers with real-time
+          tap lists, personalized recommendations based on your taste, and a map
+          to guide you to your next perfect pint.
+        </p>
+      </div>
     </div>
+  );
+}
+
+function Em({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="bg-foreground text-background inline-block -rotate-1">
+      {children}
+    </span>
   );
 }
