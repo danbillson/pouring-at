@@ -12,29 +12,6 @@ export type Beer = {
   };
 };
 
-export async function searchBeers(search: string) {
-  if (!search || search.length < 1) {
-    return [];
-  }
-
-  const beers = await db
-    .select({
-      id: beer.id,
-      name: beer.name,
-      brewery: {
-        name: brewery.name,
-      },
-    })
-    .from(beer)
-    .leftJoin(brewery, eq(beer.breweryId, brewery.id))
-    .where(
-      or(ilike(beer.name, `%${search}%`), ilike(brewery.name, `%${search}%`))
-    )
-    .limit(10);
-
-  return beers as Beer[];
-}
-
 export interface CreateBeerInput {
   name: string;
   style: string;

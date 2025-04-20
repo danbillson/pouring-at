@@ -11,16 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ breweries: [] });
   }
 
-  const breweries = await db
-    .select({
-      id: brewery.id,
-      name: brewery.name,
-      slug: brewery.slug,
-      formattedAddress: brewery.formattedAddress,
-    })
-    .from(brewery)
-    .where(ilike(brewery.name, `%${search}%`))
-    .limit(10);
+  const breweries = await db.query.brewery.findMany({
+    where: ilike(brewery.name, `%${search}%`),
+    limit: 10,
+  });
 
   return NextResponse.json({ breweries });
 }
