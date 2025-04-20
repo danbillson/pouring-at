@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { beer, brewery } from "@/db/schema";
-import { and, eq, ilike, or } from "drizzle-orm";
+import { beer } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export type Beer = {
   id: string;
