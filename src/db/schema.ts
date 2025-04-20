@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   decimal,
@@ -142,3 +143,31 @@ export const tap = pgTable(
   },
   (table) => [unique("tap_bar_beer_unique").on(table.barId, table.beerId)]
 );
+
+// Relations
+export const barRelations = relations(bar, ({ many }) => ({
+  taps: many(tap),
+}));
+
+export const breweryRelations = relations(brewery, ({ many }) => ({
+  beers: many(beer),
+}));
+
+export const beerRelations = relations(beer, ({ one, many }) => ({
+  brewery: one(brewery, {
+    fields: [beer.breweryId],
+    references: [brewery.id],
+  }),
+  taps: many(tap),
+}));
+
+export const tapRelations = relations(tap, ({ one }) => ({
+  bar: one(bar, {
+    fields: [tap.barId],
+    references: [bar.id],
+  }),
+  beer: one(beer, {
+    fields: [tap.beerId],
+    references: [beer.id],
+  }),
+}));

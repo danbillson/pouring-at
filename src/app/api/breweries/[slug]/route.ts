@@ -9,15 +9,9 @@ export async function GET(
 ) {
   const { slug } = params;
 
-  const [result] = await db
-    .select({
-      id: brewery.id,
-      name: brewery.name,
-      slug: brewery.slug,
-    })
-    .from(brewery)
-    .where(eq(brewery.slug, slug))
-    .limit(1);
+  const result = await db.query.brewery.findFirst({
+    where: eq(brewery.slug, slug),
+  });
 
   if (!result) {
     return NextResponse.json({ error: "Brewery not found" }, { status: 404 });

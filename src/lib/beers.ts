@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { beer, brewery } from "@/db/schema";
-import { and, eq, ilike, or } from "drizzle-orm";
+import { beer } from "@/db/schema";
+import { and, eq } from "drizzle-orm";
 
 export type Beer = {
   id: string;
@@ -11,29 +11,6 @@ export type Beer = {
     name: string;
   };
 };
-
-export async function searchBeers(search: string) {
-  if (!search || search.length < 1) {
-    return [];
-  }
-
-  const beers = await db
-    .select({
-      id: beer.id,
-      name: beer.name,
-      brewery: {
-        name: brewery.name,
-      },
-    })
-    .from(beer)
-    .leftJoin(brewery, eq(beer.breweryId, brewery.id))
-    .where(
-      or(ilike(beer.name, `%${search}%`), ilike(brewery.name, `%${search}%`))
-    )
-    .limit(10);
-
-  return beers as Beer[];
-}
 
 export interface CreateBeerInput {
   name: string;
@@ -79,21 +56,12 @@ export async function createBeer(input: CreateBeerInput) {
 }
 
 export async function getBeer(id: string) {
-  const [beerData] = await db
-    .select({
-      id: beer.id,
-      name: beer.name,
-      style: beer.style,
-      abv: beer.abv,
-      description: beer.description,
-      brewery: {
-        id: brewery.id,
-        name: brewery.name,
-      },
-    })
-    .from(beer)
-    .leftJoin(brewery, eq(beer.breweryId, brewery.id))
-    .where(eq(beer.id, id));
+  const beerData = await db.query.beer.findFirst({
+    with: {
+      brewery: true,
+    },
+    where: eq(beer.id, id),
+  });
 
   return beerData;
 }
