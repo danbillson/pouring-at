@@ -77,3 +77,23 @@ export async function createBeer(input: CreateBeerInput) {
     return { success: false, error: "Failed to create beer" };
   }
 }
+
+export async function getBeer(id: string) {
+  const [beerData] = await db
+    .select({
+      id: beer.id,
+      name: beer.name,
+      style: beer.style,
+      abv: beer.abv,
+      description: beer.description,
+      brewery: {
+        id: brewery.id,
+        name: brewery.name,
+      },
+    })
+    .from(beer)
+    .leftJoin(brewery, eq(beer.breweryId, brewery.id))
+    .where(eq(beer.id, id));
+
+  return beerData;
+}
