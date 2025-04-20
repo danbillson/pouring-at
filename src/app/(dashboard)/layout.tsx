@@ -7,9 +7,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <main className="mx-auto w-full max-w-5xl px-4">{children}</main>
-    </SidebarProvider>
+    <div className="bg-sidebar flex h-screen">
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="bg-background m-2 w-full rounded-lg px-4">
+          <div className="mx-auto w-full max-w-5xl">{children}</div>
+        </main>
+      </SidebarProvider>
+    </div>
   );
 }
