@@ -21,11 +21,11 @@ export type CreateBreweryInput = {
   postcode?: string;
 };
 
-export async function getBrewery(slug: string) {
+export async function getBrewery(id: string) {
   const [breweryData] = await db
     .select()
     .from(brewery)
-    .where(eq(brewery.slug, slug));
+    .where(eq(brewery.id, id));
   return breweryData;
 }
 

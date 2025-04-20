@@ -11,7 +11,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -27,13 +26,6 @@ import { z } from "zod";
 
 const createBarSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug can only contain lowercase letters, numbers, and hyphens"
-    ),
   addressLine1: z.string().min(1, "Address is required"),
   addressLine2: z.string().optional(),
   city: z.string().min(1, "City is required"),
@@ -47,20 +39,12 @@ const createBarSchema = z.object({
 
 type CreateBarValues = z.infer<typeof createBarSchema>;
 
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export function CreateBarForm() {
   const router = useRouter();
   const form = useForm<CreateBarValues>({
     resolver: zodResolver(createBarSchema),
     defaultValues: {
       name: "",
-      slug: "",
       addressLine1: "",
       addressLine2: "",
       city: "",
@@ -68,18 +52,15 @@ export function CreateBarForm() {
     },
   });
 
-  const name = form.watch("name");
-  const suggestedSlug = generateSlug(name);
-
   async function onSubmit(data: CreateBarValues) {
     try {
       const result = await createBar(data);
 
-      if (!result.success) {
+      if (!result.success || !result.data) {
         throw new Error(result.error);
       }
 
-      router.push(`/bars/${data.slug}`);
+      router.push(`/bars/${result.data.id}`);
     } catch (error) {
       console.error("Failed to create bar:", error);
       toast.error(
@@ -108,43 +89,8 @@ export function CreateBarForm() {
                       placeholder="Mikkeller Bar London"
                       autoComplete="off"
                       {...field}
-                      onBlur={() => {
-                        if (form.getValues("slug") === "") {
-                          form.setValue("slug", generateSlug(field.value));
-                        }
-                      }}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="slug"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Slug</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="mikkeller-bar-london"
-                      autoComplete="off"
-                      {...field}
-                    />
-                  </FormControl>
-                  {name && (
-                    <FormDescription className="flex items-center gap-2">
-                      Suggested:{" "}
-                      <Button
-                        variant="link"
-                        className="h-auto p-0 text-sm"
-                        type="button"
-                        onClick={() => form.setValue("slug", suggestedSlug)}
-                      >
-                        {suggestedSlug}
-                      </Button>
-                    </FormDescription>
-                  )}
                   <FormMessage />
                 </FormItem>
               )}

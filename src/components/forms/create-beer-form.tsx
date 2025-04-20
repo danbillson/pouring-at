@@ -44,7 +44,7 @@ type CreateBeerValues = z.infer<typeof createBeerSchema>;
 
 interface CreateBeerFormProps {
   onSuccess?: (beerId: string) => void;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
@@ -222,9 +222,11 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
           >
             {form.formState.isSubmitting ? "Creating..." : "Create Beer"}
           </Button>
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back
-          </Button>
+          {onBack && (
+            <Button type="button" variant="outline" onClick={onBack}>
+              Back
+            </Button>
+          )}
         </div>
       </form>
     </Form>

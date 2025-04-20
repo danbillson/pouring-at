@@ -33,7 +33,7 @@ type CreateBreweryValues = z.infer<typeof createBrewerySchema>;
 
 interface CreateBreweryFormProps {
   onSuccess?: (breweryId: string) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
 export function CreateBreweryForm({
@@ -79,7 +79,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter brewery name" {...field} />
+                <Input placeholder="Full Circle Brew Co" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -93,7 +93,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>Address Line 1</FormLabel>
               <FormControl>
-                <Input placeholder="Enter address" {...field} />
+                <Input placeholder="Hoults Yard" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,10 +107,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>Address Line 2 (Optional)</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Enter additional address details"
-                  {...field}
-                />
+                <Input placeholder="Byker" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -124,7 +121,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="Enter city" {...field} />
+                <Input placeholder="Newcastle upon Tyne" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -138,7 +135,7 @@ export function CreateBreweryForm({
             <FormItem>
               <FormLabel>Postcode</FormLabel>
               <FormControl>
-                <Input placeholder="Enter postcode" {...field} />
+                <Input placeholder="NE6 2HL" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,9 +150,11 @@ export function CreateBreweryForm({
           >
             {form.formState.isSubmitting ? "Creating..." : "Create Brewery"}
           </Button>
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
+          {onCancel && (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
         </div>
       </form>
     </Form>

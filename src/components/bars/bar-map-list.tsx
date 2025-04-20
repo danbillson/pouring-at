@@ -5,6 +5,7 @@ import { BarMap } from "@/components/bars/bar-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BarWithTaps } from "@/lib/bars";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type BarMapListProps = {
@@ -39,6 +40,7 @@ async function fetchBars(params: {
 
 export function BarMapList({ location, style, brewery }: BarMapListProps) {
   const [highlightedBarId, setHighlightedBarId] = useState<string | null>(null);
+  const router = useRouter();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["bars", { location, style, brewery }],
@@ -83,6 +85,9 @@ export function BarMapList({ location, style, brewery }: BarMapListProps) {
           brewery={brewery}
           highlightedBarId={highlightedBarId}
           onListItemHover={setHighlightedBarId}
+          onListItemClick={(barId) => {
+            router.push(`/bars/${barId}`);
+          }}
         />
       </div>
       <div className="h-[600px] w-full">

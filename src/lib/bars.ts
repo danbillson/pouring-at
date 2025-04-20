@@ -7,15 +7,14 @@ import { eq, sql } from "drizzle-orm";
 
 export type CreateBarInput = {
   name: string;
-  slug: string;
   addressLine1: string;
   addressLine2?: string;
   city: string;
   postcode: string;
 };
 
-export async function getBar(slug: string) {
-  const [barData] = await db.select().from(bar).where(eq(bar.slug, slug));
+export async function getBar(id: string) {
+  const [barData] = await db.select().from(bar).where(eq(bar.id, id));
   return barData;
 }
 
@@ -39,7 +38,6 @@ export async function createBar(data: CreateBarInput) {
       .insert(bar)
       .values({
         name: data.name,
-        slug: data.slug,
         addressLine1: data.addressLine1,
         addressLine2: data.addressLine2 || null,
         city: data.city,
