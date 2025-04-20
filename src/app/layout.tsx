@@ -1,4 +1,3 @@
-import { Nav } from "@/components/nav";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
@@ -23,10 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${archivo.variable} antialiased`}>
-        <Providers>
-          <Nav />
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>
