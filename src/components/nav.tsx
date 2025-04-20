@@ -11,9 +11,12 @@ export async function Nav() {
   });
 
   return (
-    <nav className="mx-auto flex w-full max-w-5xl items-center justify-between p-4">
-      <Link href="/" className="font-bold">
+    <nav className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 p-4">
+      <Link href="/" className="hidden font-bold sm:block">
         pouring<span className="text-amber-500">.</span>at
+      </Link>
+      <Link href="/" className="font-bold sm:hidden">
+        p<span className="text-amber-500">.</span>
       </Link>
 
       <LocationInput />
