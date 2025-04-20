@@ -22,10 +22,9 @@ export type CreateBreweryInput = {
 };
 
 export async function getBrewery(id: string) {
-  const [breweryData] = await db
-    .select()
-    .from(brewery)
-    .where(eq(brewery.id, id));
+  const breweryData = await db.query.brewery.findFirst({
+    where: eq(brewery.id, id),
+  });
   return breweryData;
 }
 
@@ -34,16 +33,16 @@ export async function searchBreweries(search: string) {
     return [];
   }
 
-  const breweries = await db
-    .select({
-      id: brewery.id,
-      name: brewery.name,
-      slug: brewery.slug,
-      formattedAddress: brewery.formattedAddress,
-    })
-    .from(brewery)
-    .where(ilike(brewery.name, `%${search}%`))
-    .limit(10);
+  const breweries = await db.query.brewery.findMany({
+    columns: {
+      id: true,
+      name: true,
+      slug: true,
+      formattedAddress: true,
+    },
+    where: ilike(brewery.name, `%${search}%`),
+    limit: 10,
+  });
 
   return breweries as Brewery[];
 }

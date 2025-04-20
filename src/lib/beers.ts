@@ -79,21 +79,12 @@ export async function createBeer(input: CreateBeerInput) {
 }
 
 export async function getBeer(id: string) {
-  const [beerData] = await db
-    .select({
-      id: beer.id,
-      name: beer.name,
-      style: beer.style,
-      abv: beer.abv,
-      description: beer.description,
-      brewery: {
-        id: brewery.id,
-        name: brewery.name,
-      },
-    })
-    .from(beer)
-    .leftJoin(brewery, eq(beer.breweryId, brewery.id))
-    .where(eq(beer.id, id));
+  const beerData = await db.query.beer.findFirst({
+    with: {
+      brewery: true,
+    },
+    where: eq(beer.id, id),
+  });
 
   return beerData;
 }

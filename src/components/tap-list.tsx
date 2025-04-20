@@ -34,7 +34,7 @@ export async function TapList({ barId }: { barId: string }) {
                 <div className="flex flex-col">
                   <h3 className="font-medium">
                     <span className="text-muted-foreground">
-                      {tap.brewery.name}{" "}
+                      {tap.beer.brewery.name}{" "}
                     </span>
                     {tap.beer.name}
                   </h3>

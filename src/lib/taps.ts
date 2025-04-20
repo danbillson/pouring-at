@@ -1,31 +1,22 @@
 "use server";
 
 import { db } from "@/db";
-import { beer, brewery, tap } from "@/db/schema";
+import { tap } from "@/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function getTaps(barId: string) {
   try {
-    return await db
-      .select({
-        id: tap.id,
-        tappedOn: tap.tappedOn,
+    return await db.query.tap.findMany({
+      with: {
         beer: {
-          id: beer.id,
-          name: beer.name,
-          style: beer.style,
-          abv: beer.abv,
+          with: {
+            brewery: true,
+          },
         },
-        brewery: {
-          id: brewery.id,
-          name: brewery.name,
-        },
-      })
-      .from(tap)
-      .innerJoin(beer, eq(tap.beerId, beer.id))
-      .innerJoin(brewery, eq(beer.breweryId, brewery.id))
-      .where(and(eq(tap.barId, barId), isNull(tap.tappedOff)));
+      },
+      where: and(eq(tap.barId, barId), isNull(tap.tappedOff)),
+    });
   } catch (error) {
     console.error("Failed to get taps:", error);
     return [];
