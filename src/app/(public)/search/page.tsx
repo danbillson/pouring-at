@@ -33,10 +33,10 @@ function SearchContent() {
 
   return (
     <div className="grid gap-8">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-4">
         <h1 className="text-2xl font-bold">Search</h1>
-        <div className="grid w-[400px] grid-cols-[16px_1fr_1fr] items-center gap-4">
-          <SlidersHorizontal className="h-4 w-4" />
+        <div className="xs:grid-cols-[16px_1fr_1fr] grid w-full max-w-[400px] items-center gap-4">
+          <SlidersHorizontal className="xs:block hidden h-4 w-4" />
 
           <BrewerySelect value={brewery || ""} onChange={handleBreweryChange} />
 

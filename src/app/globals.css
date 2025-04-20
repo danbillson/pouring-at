@@ -40,6 +40,7 @@
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
+  --breakpoint-xs: 30rem;
 }
 
 :root {
@@ -117,14 +118,5 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }

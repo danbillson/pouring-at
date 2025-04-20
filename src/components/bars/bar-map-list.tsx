@@ -75,8 +75,8 @@ export function BarMapList({ location, style, brewery }: BarMapListProps) {
   const center = data?.center || { lat: 51.5074, lng: -0.1278 }; // Default center if fetch fails
 
   return (
-    <div className="grid h-full lg:grid-cols-[400px_1fr]">
-      <div className="max-h-[600px] overflow-y-auto pr-2">
+    <div className="mx-auto grid h-full w-full max-w-7xl lg:grid-cols-[400px_1fr]">
+      <div className="max-h-[600px] overflow-y-auto pb-2 lg:pr-2">
         <BarList
           bars={bars}
           style={style}
