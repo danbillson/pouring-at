@@ -23,9 +23,9 @@ export default function Home() {
           </TextLoop>
         </h1>
         <p className="mt-4 max-w-2xl text-lg">
-          We've got you covered. Find all of your favourite beers with real-time
-          tap lists, personalized recommendations based on your taste, and a map
-          to guide you to your next perfect pint.
+          We&apos;ve got you covered. Find all of your favourite beers with
+          real-time tap lists, personalized recommendations based on your taste,
+          and a map to guide you to your next perfect pint.
         </p>
         <div className="mt-10 flex flex-col">
           <h3 className="mb-2 text-lg font-bold">Find bars near you</h3>
