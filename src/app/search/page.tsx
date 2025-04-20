@@ -3,7 +3,6 @@
 import { BarMapList } from "@/components/bars/bar-map-list";
 import { BrewerySelect } from "@/components/search/brewery-select";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
