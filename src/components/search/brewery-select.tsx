@@ -14,6 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { Brewery } from "@/lib/breweries";
+import { cn } from "@/lib/utils";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
@@ -67,7 +68,6 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
   const setSearchDebouncer = useAsyncDebouncer(
     (value: string) => {
       setDebouncedSearch(value);
-      onChange(value);
     },
     {
       wait: 300,
@@ -87,14 +87,17 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={cn(
+            "w-full justify-between font-normal",
+            !value && "text-muted-foreground hover:text-muted-foreground"
+          )}
         >
           {value
             ? (selectedBrewery?.name ??
               breweries.find((brewery) => brewery.slug === value)?.name ??
               name ??
               "Loading...")
-            : "Select brewery..."}
+            : "Brewery"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
