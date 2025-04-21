@@ -44,9 +44,28 @@ export async function createTap(barId: string, beerId: string) {
     });
 
     revalidatePath(`/bars/${barId}`, "page");
+    revalidatePath("/dashboard/taps");
+
     return { success: true };
   } catch (error) {
     console.error("Failed to create tap:", error);
-    return { success: false, error: "Failed to add beer to tap list" };
+    return {
+      success: false,
+      error: "Failed to add beer to tap list. It may already be on tap.",
+    };
+  }
+}
+
+export async function removeTap(tapId: string) {
+  try {
+    await db.delete(tap).where(eq(tap.id, tapId));
+    revalidatePath("/dashboard/taps");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to remove tap:", error);
+    return {
+      success: false,
+      error: "Failed to remove beer from tap list",
+    };
   }
 }
