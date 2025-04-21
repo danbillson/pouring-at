@@ -12,15 +12,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Home, User } from "lucide-react";
+import { Beer, Store, User } from "lucide-react";
 import Link from "next/link";
 
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "/dashboard",
-    icon: Home,
+    title: "Bar",
+    url: "/dashboard/bar",
+    icon: Store,
+  },
+  {
+    title: "Taps",
+    url: "/dashboard/taps",
+    icon: Beer,
   },
   {
     title: "Profile",

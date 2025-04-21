@@ -50,6 +50,13 @@
       "when": 1745182753716,
       "tag": "0006_dry_meteorite",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1745232941097,
+      "tag": "0007_brainy_multiple_man",
+      "breakpoints": true
     }
   ]
 }
