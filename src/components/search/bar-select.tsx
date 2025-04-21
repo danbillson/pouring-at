@@ -50,12 +50,10 @@ export function BarSelect() {
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Don't render if bar select should be hidden
-  if (!showBarSelect) return null;
-
   const { data: bars = [] } = useQuery({
     queryKey: ["bars", debouncedSearch],
     queryFn: () => searchBars(debouncedSearch),
+    enabled: debouncedSearch.length > 2,
   });
 
   const { data: selectedBar } = useQuery({
@@ -77,7 +75,11 @@ export function BarSelect() {
     return () => {
       setSearchDebouncer.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Don't render if bar select should be hidden
+  if (!showBarSelect) return null;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
