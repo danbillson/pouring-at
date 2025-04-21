@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 export async function hasAccessToBar() {
   const cookieStore = await cookies();
   const venue = cookieStore.get("last_visited_venue")?.value;
-  const { id: barId } = JSON.parse(venue ?? "{}");
+  const barId = extractId(venue);
 
   if (!barId) {
     redirect("/dashboard");
@@ -50,7 +50,7 @@ export async function hasAccessToBar() {
 export async function hasAccessToBrewery() {
   const cookieStore = await cookies();
   const venue = cookieStore.get("last_visited_venue")?.value;
-  const { id: breweryId } = JSON.parse(venue ?? "{}");
+  const breweryId = extractId(venue);
 
   if (!breweryId) {
     redirect("/dashboard");
@@ -87,4 +87,15 @@ export async function hasAccessToBrewery() {
   }
 
   return userBrewery;
+}
+
+function extractId(cookieValue: string | undefined) {
+  let id;
+  try {
+    id = JSON.parse(cookieValue ?? "{}").id;
+  } catch {
+    id = undefined;
+  }
+
+  return id;
 }
