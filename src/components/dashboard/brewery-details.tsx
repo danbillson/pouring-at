@@ -1,7 +1,7 @@
 "use client";
 
 import { BreweryDetailsForm } from "@/components/dashboard/brewery-details-form";
-import { BreweryLogoUpload } from "@/components/dashboard/brewery-logo-upload";
+import { BreweryImageUpload } from "@/components/dashboard/brewery-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Brewery } from "@/db/schema";
@@ -41,7 +41,7 @@ export default function BreweryDetails({
               <p className="text-muted-foreground text-sm">No cover image</p>
             </div>
           )}
-          <BreweryLogoUpload
+          <BreweryImageUpload
             brewery={brewery}
             type="cover"
             className="top-[unset] -right-2 -bottom-2 size-12"
@@ -58,7 +58,7 @@ export default function BreweryDetails({
               {brewery.name?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <BreweryLogoUpload brewery={brewery} type="logo" />
+          <BreweryImageUpload brewery={brewery} type="logo" />
         </div>
       </div>
 

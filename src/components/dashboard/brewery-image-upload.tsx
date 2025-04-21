@@ -14,7 +14,7 @@ type BreweryImageUploadProps = {
   className?: string;
 };
 
-export function BreweryLogoUpload({
+export function BreweryImageUpload({
   brewery,
   type,
   className,
