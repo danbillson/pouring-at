@@ -175,6 +175,8 @@ export const beer = pgTable("beer", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export type Beer = typeof beer.$inferSelect;
+
 export const tap = pgTable(
   "tap",
   {
@@ -194,6 +196,8 @@ export const tap = pgTable(
   },
   (table) => [unique("tap_bar_beer_unique").on(table.barId, table.beerId)]
 );
+
+export type Tap = typeof tap.$inferSelect;
 
 // Relations
 export const barRelations = relations(bar, ({ many }) => ({
