@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Brewery } from "@/db/schema";
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
 
@@ -31,10 +32,11 @@ export default function BreweryDetails({
         <p className="text-muted-foreground mb-4 text-sm">Cover Image</p>
         <div className="bg-muted relative aspect-[21/9] w-full rounded-lg">
           {brewery.coverImage ? (
-            <img
+            <Image
               src={`${storageUrl}/${brewery.coverImage}`}
               alt={`${brewery.name} cover`}
-              className="h-full w-full object-cover"
+              className="h-full w-full rounded-lg object-cover"
+              fill
             />
           ) : (
             <div className="flex h-full items-center justify-center">

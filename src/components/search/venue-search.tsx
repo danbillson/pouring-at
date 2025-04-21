@@ -53,7 +53,7 @@ export function VenueSearch() {
   });
 
   const { data: venue } = useQuery({
-    queryKey: ["venue", selectedVenue?.type, selectedVenue?.id],
+    queryKey: ["venue", selectedVenue],
     queryFn: () =>
       selectedVenue ? getVenue(selectedVenue.id, selectedVenue.type) : null,
     enabled: !!selectedVenue,
