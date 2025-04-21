@@ -78,7 +78,7 @@ export function BarMapList({ location, style, brewery }: BarMapListProps) {
 
   return (
     <div className="mx-auto grid h-full w-full max-w-7xl lg:grid-cols-[400px_1fr]">
-      <div className="max-h-[600px] overflow-y-auto pb-2 lg:pr-2">
+      <div className="max-h-[calc(100vh-200px)] overflow-y-auto pb-2 lg:pr-2">
         <BarList
           bars={bars}
           style={style}
@@ -90,7 +90,7 @@ export function BarMapList({ location, style, brewery }: BarMapListProps) {
           }}
         />
       </div>
-      <div className="h-[600px] w-full">
+      <div className="h-[calc(100vh-200px)] w-full">
         <BarMap
           bars={bars}
           center={center}

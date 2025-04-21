@@ -9,5 +9,6 @@ type UploadImageOptions = {
 export async function uploadImage({ bucket, file, path }: UploadImageOptions) {
   return supabase.storage.from(bucket).upload(path, file, {
     cacheControl: "3600",
+    upsert: true,
   });
 }

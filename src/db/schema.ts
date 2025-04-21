@@ -115,6 +115,8 @@ export const bar = pgTable(
     city: text("city"),
     postcode: text("postcode"),
     formattedAddress: text("formatted_address"),
+    logo: text("logo"),
+    coverImage: text("cover_image"),
     location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
     verified: boolean("verified").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -126,6 +128,8 @@ export const bar = pgTable(
     unique("bar_slug_unique").on(table.slug),
   ]
 );
+
+export type Bar = typeof bar.$inferSelect;
 
 export const brewery = pgTable(
   "brewery",
