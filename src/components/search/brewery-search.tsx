@@ -68,6 +68,7 @@ export function BrewerySearch({
     return () => {
       setSearchDebouncer.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

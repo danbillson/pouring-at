@@ -78,6 +78,7 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
     return () => {
       setSearchDebouncer.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
