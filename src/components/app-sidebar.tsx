@@ -26,6 +26,7 @@ const sharedItems = [
 ];
 
 const barItems = [
+  ...sharedItems,
   {
     title: "Bar",
     url: "/dashboard/bar",
@@ -36,7 +37,6 @@ const barItems = [
     url: "/dashboard/taps",
     icon: Beer,
   },
-  ...sharedItems,
 ];
 
 const breweryItems = [

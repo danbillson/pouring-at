@@ -1,4 +1,5 @@
 import { AddTap } from "@/components/add-tap";
+import { DeleteTapButton } from "@/components/dashboard/delete-tap-button";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,9 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { hasAccessToBar } from "@/lib/access";
-import { getTaps, removeTap } from "@/lib/taps";
-import { Beer, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { getTaps } from "@/lib/taps";
+import { Beer } from "lucide-react";
 
 export default async function TapsPage() {
   const bar = await hasAccessToBar();
@@ -64,25 +64,7 @@ export default async function TapsPage() {
                     </div>
                   </div>
 
-                  <form
-                    action={async () => {
-                      "use server";
-                      const result = await removeTap(tap.id);
-                      if (!result.success) {
-                        throw new Error(result.error);
-                      }
-                    }}
-                  >
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="size-4" />
-                      <span className="sr-only">Remove {tap.beer.name}</span>
-                    </Button>
-                  </form>
+                  <DeleteTapButton tap={tap} />
                 </li>
               ))}
             </ul>
