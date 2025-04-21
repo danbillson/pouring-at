@@ -73,6 +73,8 @@ export type BarWithTaps = {
   lat: number;
   lng: number;
   distance_km: number;
+  logo: string | null;
+  cover_image: string | null;
   taps: Array<{
     beer: { id: string; name: string; style: string; abv: number };
     brewery: { id: string; name: string; slug: string };
@@ -93,6 +95,8 @@ export async function searchBars({
       SELECT 
         b.id AS bar_id,
         b.name AS bar_name,
+        b.logo AS logo,
+        b.cover_image AS cover_image,
         ST_Y(b.location::geometry) AS lat,
         ST_X(b.location::geometry) AS lng,
         ST_Distance(
@@ -147,6 +151,8 @@ export async function searchBars({
       nb.lat,
       nb.lng,
       nb.distance_km,
+      nb.logo,
+      nb.cover_image,
       COALESCE(bt.taps, '[]'::json) AS taps
     FROM nearby_bars nb
     ${style || brewerySlug ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}

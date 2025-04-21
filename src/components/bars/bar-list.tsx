@@ -1,8 +1,16 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { BarCover } from "@/components/bars/bar-cover";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { BarWithTaps } from "@/lib/bars";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type BarListProps = {
   bars: BarWithTaps[];
@@ -55,53 +63,56 @@ export function BarList({
         const isHighlighted = highlightedBarId === bar.id;
 
         return (
-          <Card
-            key={bar.id}
-            className={cn(
-              "cursor-pointer p-4 transition-colors",
-              isHighlighted ? "bg-accent" : "hover:bg-accent/50"
-            )}
-            onMouseOver={() => onListItemHover(bar.id)}
-            onClick={() => onListItemClick?.(bar.id)}
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold">{bar.name}</h3>
-                <p className="text-muted-foreground text-sm">
-                  {bar.distance_km?.toFixed(1)}km away
-                </p>
-              </div>
-              <div className="text-right text-sm">
-                <p>{bar.taps.length} beers on tap</p>
-              </div>
-            </div>
+          <Link href={`/bars/${bar.id}`} key={bar.id} className="block">
+            <Card
+              className={cn(
+                "cursor-pointer overflow-hidden transition-colors",
+                isHighlighted ? "bg-accent" : "hover:bg-accent/50",
+                bar.cover_image && "pt-0"
+              )}
+              onMouseOver={() => onListItemHover(bar.id)}
+              onClick={() => onListItemClick?.(bar.id)}
+            >
+              <BarCover name={bar.name} path={bar.cover_image} />
+              <CardHeader className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="font-semibold">{bar.name}</CardTitle>
+                  <CardDescription className="text-muted-foreground text-sm">
+                    {bar.distance_km?.toFixed(1)}km away
+                  </CardDescription>
+                </div>
+                <div className="text-right text-sm">
+                  <p>{bar.taps.length} beers on tap</p>
+                </div>
+              </CardHeader>
 
-            {relevantBeers.length > 0 && (
-              <div className="mt-4">
-                <p className="text-muted-foreground text-sm font-medium">
-                  {style || brewery ? "Matching" : "Featured"} beers:
-                </p>
-                <ul className="mt-2 space-y-1">
-                  {relevantBeers.map((tap) => (
-                    <li
-                      key={`${bar.id}-${tap.beer.id}`}
-                      className="flex items-baseline text-sm"
-                    >
-                      <p className="font-medium">
-                        <span className="text-muted-foreground">
-                          {tap.brewery.name}{" "}
+              {relevantBeers.length > 0 && (
+                <CardContent className="mt-4">
+                  <p className="text-muted-foreground text-sm font-medium">
+                    {style || brewery ? "Matching" : "Featured"} beers:
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {relevantBeers.map((tap) => (
+                      <li
+                        key={`${bar.id}-${tap.beer.id}`}
+                        className="flex items-baseline text-sm"
+                      >
+                        <p className="font-medium">
+                          <span className="text-muted-foreground">
+                            {tap.brewery.name}{" "}
+                          </span>
+                          {tap.beer.name}
+                        </p>
+                        <span className="text-muted-foreground ml-auto text-xs">
+                          {tap.beer.abv}%
                         </span>
-                        {tap.beer.name}
-                      </p>
-                      <span className="text-muted-foreground ml-auto text-xs">
-                        {tap.beer.abv}%
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </Card>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              )}
+            </Card>
+          </Link>
         );
       })}
     </div>
