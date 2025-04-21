@@ -5,11 +5,11 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { slug } = await params;
+  const { id } = await params;
   const result = await db.query.brewery.findFirst({
-    where: eq(brewery.slug, slug),
+    where: eq(brewery.id, id),
   });
 
   if (!result) {

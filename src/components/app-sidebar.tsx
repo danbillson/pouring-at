@@ -1,6 +1,6 @@
 "use client";
 
-import { BarSelect } from "@/components/search/bar-select";
+import { VenueSearch } from "@/components/search/venue-search";
 import {
   Sidebar,
   SidebarContent,
@@ -38,7 +38,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <BarSelect />
+        <VenueSearch />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

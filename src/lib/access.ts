@@ -7,7 +7,8 @@ import { redirect } from "next/navigation";
 
 export async function hasAccessToBar() {
   const cookieStore = await cookies();
-  const barId = cookieStore.get("last_visited_bar")?.value;
+  const venue = cookieStore.get("last_visited_venue")?.value;
+  const { id: barId } = JSON.parse(venue ?? "{}");
 
   if (!barId) {
     redirect("/dashboard");
