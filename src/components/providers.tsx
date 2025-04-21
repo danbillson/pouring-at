@@ -19,6 +19,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const enableDevTools = process.env.NEXT_PUBLIC_ENABLE_DEV_TOOLS === "true";
+
 export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
@@ -27,7 +29,7 @@ export function Providers({ children }: ProvidersProps) {
           {children}
         </APIProvider>
       </NuqsAdapter>
-      <ReactQueryDevtools />
+      {enableDevTools && <ReactQueryDevtools />}
     </QueryClientProvider>
   );
 }

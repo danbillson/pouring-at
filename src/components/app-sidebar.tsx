@@ -8,14 +8,19 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { User } from "lucide-react";
+import { Home, User } from "lucide-react";
 import Link from "next/link";
 
 // Menu items.
 const items = [
   {
+    title: "Home",
+    url: "/dashboard",
+    icon: Home,
+  },
+  {
     title: "Profile",
-    url: "/profile",
+    url: "/dashboard/profile",
     icon: User,
   },
 ];
