@@ -1,6 +1,6 @@
 "use client";
 
-import { BarLogoUpload } from "@/components/dashboard/bar-logo-upload";
+import { BarImageUpload } from "@/components/dashboard/bar-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Bar } from "@/db/schema";
@@ -26,7 +26,7 @@ export default function BarDetails({ bar: initialBar }: BarDetailsProps) {
     <div className="grid gap-8">
       <div>
         <p className="text-muted-foreground mb-4 text-sm">Cover Image</p>
-        <div className="bg-muted relative aspect-[21/9] w-full overflow-hidden rounded-lg">
+        <div className="bg-muted relative aspect-[21/9] w-full rounded-lg">
           {bar.coverImage ? (
             <img
               src={`${storageUrl}/${bar.coverImage}`}
@@ -38,7 +38,11 @@ export default function BarDetails({ bar: initialBar }: BarDetailsProps) {
               <p className="text-muted-foreground text-sm">No cover image</p>
             </div>
           )}
-          {/* TODO: Add BarCoverUpload component */}
+          <BarImageUpload
+            barId={bar.id}
+            type="cover"
+            className="top-[unset] -right-2 -bottom-2 size-12"
+          />
         </div>
       </div>
 
@@ -51,7 +55,7 @@ export default function BarDetails({ bar: initialBar }: BarDetailsProps) {
               {bar.name?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <BarLogoUpload barId={bar.id} />
+          <BarImageUpload barId={bar.id} type="logo" />
         </div>
       </div>
 

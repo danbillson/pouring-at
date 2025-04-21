@@ -2,15 +2,22 @@
 
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/lib/image-upload";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";
 
-type BarLogoUploadProps = {
+type BarImageUploadProps = {
   barId: string;
+  type: "logo" | "cover";
+  className?: string;
 };
 
-export function BarLogoUpload({ barId }: BarLogoUploadProps) {
+export function BarImageUpload({
+  barId,
+  type,
+  className,
+}: BarImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -25,9 +32,9 @@ export function BarLogoUpload({ barId }: BarLogoUploadProps) {
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
-            const path = `bars/${barId}/logo.${extension}`;
+            const path = `bars/${barId}/${type}.${extension}`;
             const { data, error } = await uploadImage({
-              bucket: "logos",
+              bucket: type === "logo" ? "logos" : "covers",
               file,
               path,
             });
@@ -37,14 +44,17 @@ export function BarLogoUpload({ barId }: BarLogoUploadProps) {
               return;
             }
 
+            const body =
+              type === "logo"
+                ? { logo: data.fullPath }
+                : { coverImage: data.fullPath };
+
             const response = await fetch(`/api/bars/${barId}`, {
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({
-                logo: data.fullPath,
-              }),
+              body: JSON.stringify(body),
             });
 
             if (!response.ok) {
@@ -59,7 +69,10 @@ export function BarLogoUpload({ barId }: BarLogoUploadProps) {
       />
       <Button
         variant="outline"
-        className="absolute top-0 right-0 size-8 rounded-full border-0"
+        className={cn(
+          "absolute top-0 right-0 size-8 rounded-full border-0",
+          className
+        )}
         onClick={() => inputRef.current?.click()}
       >
         <Pencil className="size-4" />
