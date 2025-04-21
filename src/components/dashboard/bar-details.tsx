@@ -3,7 +3,6 @@
 import { BarDetailsForm } from "@/components/dashboard/bar-details-form";
 import { BarImageUpload } from "@/components/dashboard/bar-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Bar } from "@/db/schema";
 import { useQuery } from "@tanstack/react-query";

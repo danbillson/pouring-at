@@ -98,7 +98,7 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input placeholder="mikkeller-bar-london" {...field} />
+                <Input placeholder="mikkeller-bar-london" readOnly {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
