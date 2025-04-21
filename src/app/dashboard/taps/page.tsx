@@ -1,6 +1,5 @@
 import { AddTap } from "@/components/add-tap";
 import { DeleteTapButton } from "@/components/dashboard/delete-tap-button";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
