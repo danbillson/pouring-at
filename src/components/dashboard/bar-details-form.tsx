@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Bar } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -50,6 +51,17 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
       postcode: bar.postcode ?? "",
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      name: bar.name,
+      slug: bar.slug ?? "",
+      addressLine1: bar.addressLine1 ?? "",
+      addressLine2: bar.addressLine2 ?? "",
+      city: bar.city ?? "",
+      postcode: bar.postcode ?? "",
+    });
+  }, [bar, form]);
 
   async function onSubmit(data: UpdateBarValues) {
     try {

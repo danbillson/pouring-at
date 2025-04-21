@@ -17,6 +17,7 @@ import { Venue } from "@/types/venue";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Hop, Store } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 async function searchVenues(search: string) {
@@ -30,8 +31,7 @@ async function searchVenues(search: string) {
 }
 
 async function getVenue(id: string, type: "bar" | "brewery") {
-  const path = type === "bar" ? "bars" : "breweries";
-  const response = await fetch(`/api/${path}/${id}`);
+  const response = await fetch(`/api/${type}s/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${type}`);
   }
@@ -40,6 +40,7 @@ async function getVenue(id: string, type: "bar" | "brewery") {
 }
 
 export function VenueSearch() {
+  const router = useRouter();
   const { selectedVenue, setSelectedVenue, showVenueSelect } = useDashboard();
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -75,6 +76,23 @@ export function VenueSearch() {
 
   // Don't render if venue select should be hidden
   if (!showVenueSelect) return null;
+
+  const handleVenueSelect = (venue: Venue | null) => {
+    setSelectedVenue(venue);
+    setOpen(false);
+
+    if (!venue) {
+      return;
+    }
+
+    const isChangingType = selectedVenue?.type !== venue.type;
+
+    if (isChangingType) {
+      router.push(`/dashboard/${venue.type}`);
+    }
+
+    router.refresh();
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -118,12 +136,10 @@ export function VenueSearch() {
                 key={`${venue.type}-${venue.id}`}
                 value={venue.id}
                 onSelect={() => {
-                  setSelectedVenue(
+                  handleVenueSelect(
                     selectedVenue?.id === venue.id ? null : venue
                   );
-                  setOpen(false);
                 }}
-                className="cursor-pointer"
               >
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
