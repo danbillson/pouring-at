@@ -4,24 +4,24 @@ import { VenueSearch } from "@/components/search/venue-search";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Beer, Hop, Store, User } from "lucide-react";
+import { Beer, Hop, LayoutPanelLeft, Store, User } from "lucide-react";
 import Link from "next/link";
 import { useDashboard } from "./dashboard/dashboard-provider";
 
 // Menu items.
 const sharedItems = [
   {
-    title: "Profile",
-    url: "/dashboard/profile",
-    icon: User,
+    title: "Home",
+    url: "/dashboard",
+    icon: LayoutPanelLeft,
   },
 ];
 
@@ -40,6 +40,7 @@ const barItems = [
 ];
 
 const breweryItems = [
+  ...sharedItems,
   {
     title: "Brewery",
     url: "/dashboard/brewery",
@@ -50,7 +51,6 @@ const breweryItems = [
     url: "/dashboard/beers",
     icon: Beer,
   },
-  ...sharedItems,
 ];
 
 export function AppSidebar() {
@@ -81,6 +81,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenuButton asChild>
+          <Link href="/dashboard/profile">
+            <User />
+            <span>Profile</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarFooter>
     </Sidebar>
   );
 }

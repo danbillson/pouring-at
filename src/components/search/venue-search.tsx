@@ -31,7 +31,8 @@ async function searchVenues(search: string) {
 }
 
 async function getVenue(id: string, type: "bar" | "brewery") {
-  const response = await fetch(`/api/${type}s/${id}`);
+  const path = type === "bar" ? "bars" : "breweries";
+  const response = await fetch(`/api/${path}/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${type}`);
   }
@@ -88,7 +89,7 @@ export function VenueSearch() {
     const isChangingType = selectedVenue?.type !== venue.type;
 
     if (isChangingType) {
-      router.push(`/dashboard/${venue.type}`);
+      router.push(`/dashboard`);
     }
 
     router.refresh();
