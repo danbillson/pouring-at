@@ -74,6 +74,7 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
     return () => {
       setSearchDebouncer.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

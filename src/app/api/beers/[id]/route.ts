@@ -5,10 +5,9 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
-
+  const { id } = await params;
   const result = await db.query.beer.findFirst({
     where: eq(beer.id, id),
     with: {
