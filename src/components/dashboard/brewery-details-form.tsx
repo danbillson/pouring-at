@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Bar } from "@/db/schema";
+import { Brewery } from "@/db/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const updateBarSchema = z.object({
+const updateBrewerySchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   addressLine1: z.string().min(1, "Address is required"),
@@ -30,42 +30,43 @@ const updateBarSchema = z.object({
     .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
       message: "Invalid UK postcode format",
     }),
+  website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });
 
-type UpdateBarValues = z.infer<typeof updateBarSchema>;
+type UpdateBreweryValues = z.infer<typeof updateBrewerySchema>;
 
-type BarDetailsFormProps = {
-  bar: Bar;
+type BreweryDetailsFormProps = {
+  brewery: Brewery;
 };
 
-export function BarDetailsForm({ bar }: BarDetailsFormProps) {
+export function BreweryDetailsForm({ brewery }: BreweryDetailsFormProps) {
   const queryClient = useQueryClient();
-  const form = useForm<UpdateBarValues>({
-    resolver: zodResolver(updateBarSchema),
+  const form = useForm<UpdateBreweryValues>({
+    resolver: zodResolver(updateBrewerySchema),
     defaultValues: {
-      name: bar.name,
-      slug: bar.slug ?? "",
-      addressLine1: bar.addressLine1 ?? "",
-      addressLine2: bar.addressLine2 ?? "",
-      city: bar.city ?? "",
-      postcode: bar.postcode ?? "",
+      name: brewery.name,
+      slug: brewery.slug ?? "",
+      addressLine1: brewery.addressLine1 ?? "",
+      addressLine2: brewery.addressLine2 ?? "",
+      city: brewery.city ?? "",
+      postcode: brewery.postcode ?? "",
     },
   });
 
   useEffect(() => {
     form.reset({
-      name: bar.name,
-      slug: bar.slug ?? "",
-      addressLine1: bar.addressLine1 ?? "",
-      addressLine2: bar.addressLine2 ?? "",
-      city: bar.city ?? "",
-      postcode: bar.postcode ?? "",
+      name: brewery.name,
+      slug: brewery.slug ?? "",
+      addressLine1: brewery.addressLine1 ?? "",
+      addressLine2: brewery.addressLine2 ?? "",
+      city: brewery.city ?? "",
+      postcode: brewery.postcode ?? "",
     });
-  }, [bar, form]);
+  }, [brewery, form]);
 
-  async function onSubmit(data: UpdateBarValues) {
+  async function onSubmit(data: UpdateBreweryValues) {
     try {
-      const response = await fetch(`/api/bars/${bar.id}`, {
+      const response = await fetch(`/api/breweries/${brewery.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -74,15 +75,17 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update bar");
+        throw new Error("Failed to update brewery");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["bars", bar.id] });
-      toast.success("Bar details updated successfully");
+      await queryClient.invalidateQueries({
+        queryKey: ["breweries", brewery.id],
+      });
+      toast.success("Brewery details updated successfully");
     } catch (error) {
-      console.error("Failed to update bar:", error);
+      console.error("Failed to update brewery:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to update bar"
+        error instanceof Error ? error.message : "Failed to update brewery"
       );
     }
   }
@@ -95,9 +98,9 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Bar Name</FormLabel>
+              <FormLabel>Brewery Name</FormLabel>
               <FormControl>
-                <Input placeholder="Mikkeller Bar London" {...field} />
+                <Input placeholder="Cloudwater Brew Co" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -110,7 +113,7 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input placeholder="mikkeller-bar-london" readOnly {...field} />
+                <Input placeholder="cloudwater" readOnly {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -123,7 +126,7 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             <FormItem>
               <FormLabel>Address Line 1</FormLabel>
               <FormControl>
-                <Input placeholder="2-4 Hackney Road" {...field} />
+                <Input placeholder="7-8 Piccadilly Trading Estate" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -149,7 +152,7 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="London" {...field} />
+                <Input placeholder="Manchester" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -162,7 +165,7 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             <FormItem>
               <FormLabel>Postcode</FormLabel>
               <FormControl>
-                <Input placeholder="E2 7NS" {...field} />
+                <Input placeholder="M1 2HR" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

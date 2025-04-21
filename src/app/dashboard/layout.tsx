@@ -2,13 +2,14 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { DashboardProvider } from "@/components/dashboard/dashboard-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { db } from "@/db";
-import { bar } from "@/db/schema";
+import { bar, brewery } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { Venue } from "@/types/venue";
 import { eq } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-const BAR_COOKIE_NAME = "last_visited_bar";
+const VENUE_COOKIE_NAME = "last_visited_venue";
 
 export default async function DashboardLayout({
   children,
@@ -24,30 +25,53 @@ export default async function DashboardLayout({
 
   const isAdmin = session.user.role === "admin";
 
-  // Get available bars based on role
-  const availableBars = await db.query.bar.findMany({
-    where: isAdmin
-      ? undefined
-      : eq(bar.organizationId, session.session.activeOrganizationId ?? ""),
-  });
+  // Get available venues based on role
+  const [bars, breweries] = await Promise.all([
+    db.query.bar.findMany({
+      where: isAdmin
+        ? undefined
+        : eq(bar.organizationId, session.session.activeOrganizationId ?? ""),
+    }),
+    db.query.brewery.findMany({
+      where: isAdmin
+        ? undefined
+        : eq(
+            brewery.organizationId,
+            session.session.activeOrganizationId ?? ""
+          ),
+    }),
+  ]);
 
-  let defaultBarId = cookieStore.get(BAR_COOKIE_NAME)?.value;
+  // Transform to venues
+  const availableVenues = [
+    ...bars.map((b) => ({ type: "bar" as const, ...b })),
+    ...breweries.map((b) => ({ type: "brewery" as const, ...b })),
+  ] as unknown as Venue[];
 
-  // Validate the stored bar ID is still accessible to user
-  if (defaultBarId && !availableBars.some((b) => b.id === defaultBarId)) {
-    defaultBarId = undefined;
+  let defaultVenue: Venue | undefined;
+  const storedVenue = cookieStore.get(VENUE_COOKIE_NAME)?.value;
+
+  if (storedVenue) {
+    try {
+      const { id, type } = JSON.parse(storedVenue);
+      defaultVenue = availableVenues.find(
+        (v) => v.id === id && v.type === type
+      );
+    } catch {
+      // Invalid stored venue, ignore
+    }
   }
 
-  // Auto-select if user has only one bar and isn't admin
-  if (!defaultBarId && availableBars.length === 1 && !isAdmin) {
-    defaultBarId = availableBars[0].id;
+  // Auto-select if user has only one venue and isn't admin
+  if (!defaultVenue && availableVenues.length === 1 && !isAdmin) {
+    defaultVenue = availableVenues[0];
   }
 
   return (
     <DashboardProvider
-      defaultBarId={defaultBarId}
+      defaultVenue={defaultVenue}
       isAdmin={isAdmin}
-      availableBars={availableBars}
+      availableVenues={availableVenues}
     >
       <SidebarProvider>
         <AppSidebar />

@@ -1,22 +1,31 @@
 "use client";
 
-import { BarSelect } from "@/components/search/bar-select";
+import { VenueSearch } from "@/components/search/venue-search";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Beer, Store, User } from "lucide-react";
+import { Beer, Hop, LayoutPanelLeft, Store, User } from "lucide-react";
 import Link from "next/link";
+import { useDashboard } from "./dashboard/dashboard-provider";
 
 // Menu items.
-const items = [
+const sharedItems = [
+  {
+    title: "Home",
+    url: "/dashboard",
+    icon: LayoutPanelLeft,
+  },
+];
+
+const barItems = [
   {
     title: "Bar",
     url: "/dashboard/bar",
@@ -27,22 +36,35 @@ const items = [
     url: "/dashboard/taps",
     icon: Beer,
   },
+  ...sharedItems,
+];
+
+const breweryItems = [
+  ...sharedItems,
   {
-    title: "Profile",
-    url: "/dashboard/profile",
-    icon: User,
+    title: "Brewery",
+    url: "/dashboard/brewery",
+    icon: Hop,
+  },
+  {
+    title: "Beers",
+    url: "/dashboard/beers",
+    icon: Beer,
   },
 ];
 
 export function AppSidebar() {
+  const { selectedVenue } = useDashboard();
+
+  const items = selectedVenue?.type === "bar" ? barItems : breweryItems;
+
   return (
     <Sidebar>
       <SidebarHeader>
-        <BarSelect />
+        <VenueSearch />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -59,6 +81,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenuButton asChild>
+          <Link href="/dashboard/profile">
+            <User />
+            <span>Profile</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarFooter>
     </Sidebar>
   );
 }

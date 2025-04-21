@@ -1,52 +1,56 @@
 "use client";
 
+import { Venue, VenueType } from "@/types/venue";
 import { createContext, useCallback, useContext, useState } from "react";
 
-const BAR_COOKIE_NAME = "last_visited_bar";
-const BAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 1 week
+const VENUE_COOKIE_NAME = "last_visited_venue";
+const VENUE_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 1 week
 
 type DashboardContextType = {
-  selectedBarId: string | null;
-  setSelectedBar: (barId: string | null) => void;
-  showBarSelect: boolean;
+  selectedVenue: { id: string; type: VenueType } | null;
+  setSelectedVenue: (venue: Venue | null) => void;
+  showVenueSelect: boolean;
 };
 
 const DashboardContext = createContext<DashboardContextType | null>(null);
 
 interface DashboardProviderProps {
-  defaultBarId?: string | null;
+  defaultVenue?: Venue | null;
   isAdmin?: boolean;
-  availableBars: Array<{ id: string; name: string }>;
+  availableVenues: Venue[];
   children: React.ReactNode;
 }
 
 export function DashboardProvider({
-  defaultBarId,
+  defaultVenue,
   isAdmin = false,
-  availableBars = [],
+  availableVenues = [],
   children,
 }: DashboardProviderProps) {
-  const [selectedBarId, setSelectedBarId] = useState(defaultBarId ?? null);
+  const [selectedVenue, setSelectedVenueState] = useState(defaultVenue ?? null);
 
-  // Only show bar select if user is admin OR has access to multiple bars
-  const showBarSelect = isAdmin || availableBars.length > 1;
+  // Only show venue select if user is admin OR has access to multiple venues
+  const showVenueSelect = isAdmin || availableVenues.length > 1;
 
-  const setSelectedBar = useCallback((barId: string | null) => {
-    setSelectedBarId(barId);
+  const setSelectedVenue = useCallback((venue: Venue | null) => {
+    setSelectedVenueState(venue);
 
-    if (barId) {
-      document.cookie = `${BAR_COOKIE_NAME}=${barId}; path=/; max-age=${BAR_COOKIE_MAX_AGE}`;
+    if (venue) {
+      document.cookie = `${VENUE_COOKIE_NAME}=${JSON.stringify({
+        id: venue.id,
+        type: venue.type,
+      })}; path=/; max-age=${VENUE_COOKIE_MAX_AGE}`;
     } else {
-      document.cookie = `${BAR_COOKIE_NAME}=; path=/; max-age=0`;
+      document.cookie = `${VENUE_COOKIE_NAME}=; path=/; max-age=0`;
     }
   }, []);
 
   return (
     <DashboardContext.Provider
       value={{
-        selectedBarId,
-        setSelectedBar,
-        showBarSelect,
+        selectedVenue,
+        setSelectedVenue,
+        showVenueSelect,
       }}
     >
       {children}

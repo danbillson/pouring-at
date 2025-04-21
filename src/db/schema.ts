@@ -144,16 +144,21 @@ export const brewery = pgTable(
     city: text("city"),
     postcode: text("postcode"),
     formattedAddress: text("formatted_address"),
+    logo: text("logo"),
+    coverImage: text("cover_image"),
     location: geometry("location", { type: "point", mode: "xy", srid: 4326 }),
     verified: boolean("verified").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
+    organizationId: text("organization_id").references(() => organization.id),
   },
   (table) => [
     index("brewery_location_idx").using("gist", table.location),
     unique("brewery_slug_unique").on(table.slug),
   ]
 );
+
+export type Brewery = typeof brewery.$inferSelect;
 
 export const beer = pgTable("beer", {
   id: text("id")
