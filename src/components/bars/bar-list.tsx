@@ -89,22 +89,23 @@ export function BarList({
               {relevantBeers.length > 0 && (
                 <CardContent className="mt-4">
                   <p className="text-muted-foreground text-sm font-medium">
-                    {style || brewery ? "Matching" : "Featured"} beers:
+                    {style || brewery ? "Matching" : "Recent"} taps:
                   </p>
                   <ul className="mt-2 space-y-1">
                     {relevantBeers.map((tap) => (
                       <li
                         key={`${bar.id}-${tap.beer.id}`}
-                        className="flex items-baseline text-sm"
+                        className="flex flex-col items-baseline text-sm"
                       >
                         <p className="font-medium">
+                          {tap.beer.name}{" "}
                           <span className="text-muted-foreground">
-                            {tap.brewery.name}{" "}
+                            {tap.beer.style}
                           </span>
-                          {tap.beer.name}
                         </p>
-                        <span className="text-muted-foreground ml-auto text-xs">
-                          {tap.beer.abv}%
+                        <span className="text-muted-foreground text-xs">
+                          {tap.brewery.name}
+                          {tap.beer.abv && ` • ${tap.beer.abv}%`}
                         </span>
                       </li>
                     ))}

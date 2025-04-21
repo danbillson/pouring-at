@@ -90,11 +90,11 @@ export function BarSelect() {
           aria-expanded={open}
           className="w-full justify-between shadow-none"
         >
-          <div className="flex items-center gap-2">
-            <div className="bg-foreground text-background rounded-sm p-1">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="bg-foreground text-background shrink-0 rounded-sm p-1">
               <Store className="h-4 w-4" />
             </div>
-            <span>
+            <span className="truncate">
               {selectedBarId
                 ? (selectedBar?.name ??
                   bars.find((bar) => bar.id === selectedBarId)?.name ??

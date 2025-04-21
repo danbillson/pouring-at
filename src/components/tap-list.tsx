@@ -33,14 +33,14 @@ export async function TapList({ barId }: { barId: string }) {
 
                 <div className="flex flex-col">
                   <h3 className="font-medium">
+                    {tap.beer.name}{" "}
                     <span className="text-muted-foreground">
-                      {tap.beer.brewery.name}{" "}
+                      {tap.beer.style}
                     </span>
-                    {tap.beer.name}
                   </h3>
                   <div className="text-muted-foreground text-sm">
                     <p>
-                      {tap.beer.style}
+                      {tap.beer.brewery.name}
                       {tap.beer.abv && ` • ${tap.beer.abv}%`}
                     </p>
                   </div>

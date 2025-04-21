@@ -98,7 +98,7 @@ function SearchFallback() {
 
 export default function SearchPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-[calc(100vh-68px)]">
       <div className="container mx-auto py-8">
         <Suspense fallback={<SearchFallback />}>
           <SearchContent />
