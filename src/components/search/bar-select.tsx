@@ -1,5 +1,6 @@
 "use client";
 
+import { useDashboard } from "@/components/dashboard/dashboard-provider";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -23,11 +24,6 @@ interface Bar {
   formattedAddress?: string;
 }
 
-interface BarSelectProps {
-  value?: string;
-  onChange: (value: string) => void;
-}
-
 async function searchBars(search: string) {
   if (!search) return [];
   const response = await fetch(
@@ -49,9 +45,13 @@ async function getBar(id: string) {
   return data.bar as Bar;
 }
 
-export function BarSelect({ value, onChange }: BarSelectProps) {
+export function BarSelect() {
+  const { selectedBarId, setSelectedBar, showBarSelect } = useDashboard();
   const [open, setOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Don't render if bar select should be hidden
+  if (!showBarSelect) return null;
 
   const { data: bars = [] } = useQuery({
     queryKey: ["bars", debouncedSearch],
@@ -59,9 +59,9 @@ export function BarSelect({ value, onChange }: BarSelectProps) {
   });
 
   const { data: selectedBar } = useQuery({
-    queryKey: ["bar", value],
-    queryFn: () => getBar(value!),
-    enabled: !!value,
+    queryKey: ["bar", selectedBarId],
+    queryFn: () => (selectedBarId ? getBar(selectedBarId) : null),
+    enabled: !!selectedBarId,
   });
 
   const setSearchDebouncer = useAsyncDebouncer(
@@ -93,9 +93,9 @@ export function BarSelect({ value, onChange }: BarSelectProps) {
               <Store className="h-4 w-4" />
             </div>
             <span>
-              {value
+              {selectedBarId
                 ? (selectedBar?.name ??
-                  bars.find((bar) => bar.id === value)?.name ??
+                  bars.find((bar) => bar.id === selectedBarId)?.name ??
                   "Loading...")
                 : "Select bar..."}
             </span>
@@ -117,7 +117,9 @@ export function BarSelect({ value, onChange }: BarSelectProps) {
                 key={bar.id}
                 value={bar.id}
                 onSelect={(currentValue) => {
-                  onChange(currentValue === value ? "" : currentValue);
+                  setSelectedBar(
+                    currentValue === selectedBarId ? null : currentValue
+                  );
                   setOpen(false);
                 }}
               >

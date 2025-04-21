@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { bar, user } from "@/db/schema";
+import { bar } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { and, eq, ilike } from "drizzle-orm";
 import { headers } from "next/headers";
@@ -22,11 +22,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ bars: [] });
   }
 
-  // Get user role
-  const [userData] = await db
-    .select({ role: user.role })
-    .from(user)
-    .where(eq(user.id, session.user.id));
+  const isAdmin = session.user.role === "admin";
 
   // Split search into words and create conditions for each word
   const searchTerms = search.split(" ").filter(Boolean);
@@ -36,7 +32,7 @@ export async function GET(request: Request) {
   const searchConditions = [and(...nameConditions)];
 
   // If not admin and has active organization, add organization filter
-  if (userData?.role !== "admin" && session.session.activeOrganizationId) {
+  if (!isAdmin && session.session.activeOrganizationId) {
     searchConditions.push(
       eq(bar.organizationId, session.session.activeOrganizationId)
     );

@@ -28,7 +28,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <BarSelect onChange={() => {}} />
+        <BarSelect />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
