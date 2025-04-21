@@ -129,6 +129,8 @@ export const bar = pgTable(
   ]
 );
 
+export type Bar = typeof bar.$inferSelect;
+
 export const brewery = pgTable(
   "brewery",
   {
