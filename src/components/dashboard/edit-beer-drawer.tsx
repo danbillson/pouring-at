@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Beer } from "@/db/schema";
 import { EditBeerForm } from "./edit-beer-form";
 
@@ -21,15 +21,15 @@ export function EditBeerDrawer({
   onOpenChange,
 }: EditBeerDrawerProps) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Edit Beer</SheetTitle>
-        </SheetHeader>
+    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Edit Beer</DrawerTitle>
+        </DrawerHeader>
         <div className="p-4">
           <EditBeerForm beer={beer} onSuccess={() => onOpenChange(false)} />
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
