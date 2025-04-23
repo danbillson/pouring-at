@@ -10,6 +10,7 @@ type DashboardContextType = {
   selectedVenue: { id: string; type: VenueType } | null;
   setSelectedVenue: (venue: Venue | null) => void;
   showVenueSelect: boolean;
+  isStandardUser: boolean;
 };
 
 const DashboardContext = createContext<DashboardContextType | null>(null);
@@ -29,6 +30,7 @@ export function DashboardProvider({
 }: DashboardProviderProps) {
   const [selectedVenue, setSelectedVenueState] = useState(defaultVenue ?? null);
 
+  const isStandardUser = !isAdmin && availableVenues.length === 0;
   // Only show venue select if user is admin OR has access to multiple venues
   const showVenueSelect = isAdmin || availableVenues.length > 1;
 
@@ -51,6 +53,7 @@ export function DashboardProvider({
         selectedVenue,
         setSelectedVenue,
         showVenueSelect,
+        isStandardUser,
       }}
     >
       {children}
