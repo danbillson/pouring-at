@@ -1,4 +1,5 @@
 import { AddTap } from "@/components/add-tap";
+import { BeerDetail } from "@/components/dashboard/beer-detail";
 import { DeleteTapButton } from "@/components/dashboard/delete-tap-button";
 import {
   Card,
@@ -9,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { hasAccessToBar } from "@/lib/access";
 import { getTaps } from "@/lib/taps";
-import { Beer } from "lucide-react";
 
 export default async function TapsPage() {
   const bar = await hasAccessToBar();
@@ -42,26 +42,7 @@ export default async function TapsPage() {
                   key={tap.id}
                   className="flex items-center justify-between gap-4 py-4"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="bg-muted flex size-10 items-center justify-center rounded-md">
-                      <Beer className="size-4" />
-                    </div>
-
-                    <div className="flex flex-col">
-                      <h3 className="font-medium">
-                        {tap.beer.name}{" "}
-                        <span className="text-muted-foreground">
-                          {tap.beer.style}
-                        </span>
-                      </h3>
-                      <div className="text-muted-foreground text-sm">
-                        <p>
-                          {tap.beer.brewery.name}
-                          {tap.beer.abv && ` • ${tap.beer.abv}%`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <BeerDetail beer={tap.beer} brewery={tap.beer.brewery.name} />
 
                   <DeleteTapButton tap={tap} />
                 </li>
