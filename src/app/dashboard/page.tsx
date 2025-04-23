@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 
 export default function DashboardPage() {
-  const { selectedVenue } = useDashboard();
+  const { selectedVenue, isStandardUser } = useDashboard();
 
   if (!selectedVenue) {
     return (
@@ -20,9 +20,11 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Welcome to your dashboard</CardTitle>
-            <CardDescription>
-              Please select a venue to get started
-            </CardDescription>
+            {!isStandardUser && (
+              <CardDescription>
+                Please select a venue to get started
+              </CardDescription>
+            )}
           </CardHeader>
         </Card>
       </div>

@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { VenueType } from "@/types/venue";
 import { Beer, Hop, LayoutPanelLeft, Store, User } from "lucide-react";
 import Link from "next/link";
 import { useDashboard } from "./dashboard/dashboard-provider";
@@ -54,13 +55,16 @@ const breweryItems = [
 ];
 
 export function AppSidebar() {
-  const { selectedVenue } = useDashboard();
+  const { selectedVenue, isStandardUser } = useDashboard();
 
-  const items = selectedVenue?.type === "bar" ? barItems : breweryItems;
+  const items = getSidebarItems(isStandardUser, selectedVenue);
 
   return (
     <Sidebar>
       <SidebarHeader>
+        <Link href="/" className="hidden p-2 font-bold sm:block">
+          pouring<span className="text-amber-500">.</span>at
+        </Link>
         <VenueSearch />
       </SidebarHeader>
       <SidebarContent>
@@ -91,4 +95,15 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
+}
+
+function getSidebarItems(
+  isStandardUser: boolean,
+  selectedVenue: { id: string; type: VenueType } | null
+) {
+  if (isStandardUser) {
+    return sharedItems;
+  }
+
+  return selectedVenue?.type === "bar" ? barItems : breweryItems;
 }

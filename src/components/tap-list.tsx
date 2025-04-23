@@ -1,23 +1,29 @@
 import { AddTap } from "@/components/add-tap";
+import { auth } from "@/lib/auth";
 import { getTaps } from "@/lib/taps";
 import { Beer } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 
 export async function TapList({ barId }: { barId: string }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   const taps = await getTaps(barId);
 
   return (
     <div className="mt-8">
       <div className="bg-background mb-4 flex items-center justify-between rounded-lg p-4">
         <h2 className="text-2xl font-bold">Tap list</h2>
-        <AddTap barId={barId} />
+        {session?.user && <AddTap barId={barId} />}
       </div>
       {taps.length === 0 ? (
         <div className="bg-muted grid place-items-center rounded-md px-6 py-12">
           <p className="text-muted-foreground mb-6">
             No beers currently on tap
           </p>
-          <AddTap barId={barId} />
+          {session?.user && <AddTap barId={barId} />}
         </div>
       ) : (
         <ul className="bg-background rounded-lg p-4">
