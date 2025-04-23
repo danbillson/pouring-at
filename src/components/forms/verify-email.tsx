@@ -26,7 +26,7 @@ export function VerifyEmail({ email }: VerifyEmailProps) {
         </CardHeader>
       </Card>
       <p className="text-muted-foreground text-center text-sm">
-        Can't find our email? Check your spam folder!
+        Can&apos;t find our email? Check your spam folder!
       </p>
     </>
   );
