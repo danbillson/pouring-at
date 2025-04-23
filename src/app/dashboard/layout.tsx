@@ -4,7 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { db } from "@/db";
 import { bar, brewery } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { Venue } from "@/types/venue";
+import { Venue } from "@/lib/venue";
 import { eq } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";

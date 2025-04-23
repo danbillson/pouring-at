@@ -1,5 +1,6 @@
 "use client";
 
+import { VerifyEmail } from "@/components/forms/verify-email";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,8 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,8 +43,8 @@ const signUpSchema = z.object({
 type SignUpValues = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
-  const router = useRouter();
   const [error, setError] = useState<string>();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -63,10 +64,26 @@ export function SignUpForm() {
         name: username,
         callbackURL: "/",
       });
-      router.push("/");
+      setHasSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
     }
+  }
+
+  if (hasSubmitted) {
+    return (
+      <>
+        <VerifyEmail email={form.getValues("email")} />
+        <Button
+          variant="ghost"
+          onClick={() => setHasSubmitted(false)}
+          className="group"
+        >
+          <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
+          Back to sign up
+        </Button>
+      </>
+    );
   }
 
   return (

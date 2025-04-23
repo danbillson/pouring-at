@@ -47,16 +47,22 @@ export function LoginForm() {
   async function onSubmit({ email, password }: LoginValues) {
     try {
       setError(undefined);
-      const { error } = await signIn.email({
-        email,
-        password,
-        callbackURL: "/",
-      });
-
-      if (error) {
-        setError("Invalid email or password. Please try again.");
-        return;
-      }
+      await signIn.email(
+        {
+          email,
+          password,
+          callbackURL: "/",
+        },
+        {
+          onError: (ctx) => {
+            if (ctx.error.status === 403) {
+              setError("Please verify your email address.");
+            } else {
+              setError("Invalid email or password. Please try again.");
+            }
+          },
+        }
+      );
 
       router.push("/");
     } catch {

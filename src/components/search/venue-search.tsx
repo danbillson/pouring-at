@@ -13,7 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Venue } from "@/types/venue";
+import { Venue } from "@/lib/venue";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Hop, Store } from "lucide-react";
