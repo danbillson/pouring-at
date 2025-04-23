@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { VenueType } from "@/types/venue";
+import { VenueType } from "@/lib/venue";
 import { Beer, Hop, LayoutPanelLeft, Store, User } from "lucide-react";
 import Link from "next/link";
 import { useDashboard } from "./dashboard/dashboard-provider";
