@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/storage/supabase";
 
 type UploadImageOptions = {
   bucket: string;

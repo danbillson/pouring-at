@@ -1,29 +1,27 @@
 "use client";
 
-import { BreweryDetailsForm } from "@/components/dashboard/brewery-details-form";
-import { BreweryImageUpload } from "@/components/dashboard/brewery-image-upload";
+import { BarDetailsForm } from "@/components/dashboard/bar/bar-details-form";
+import { BarImageUpload } from "@/components/dashboard/bar/bar-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Brewery } from "@/db/schema";
+import { Bar } from "@/db/schema";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
 
-type BreweryDetailsProps = {
-  brewery: Brewery;
+type BarDetailsProps = {
+  bar: Bar;
 };
 
-export default function BreweryDetails({
-  brewery: initialBrewery,
-}: BreweryDetailsProps) {
+export function BarDetails({ bar: initialBar }: BarDetailsProps) {
   const {
-    data: { brewery },
+    data: { bar },
   } = useQuery({
-    queryKey: ["breweries", initialBrewery.id],
+    queryKey: ["bars", initialBar.id],
     queryFn: () =>
-      fetch(`/api/breweries/${initialBrewery.id}`).then((res) => res.json()),
-    initialData: { brewery: initialBrewery },
+      fetch(`/api/bars/${initialBar.id}`).then((res) => res.json()),
+    initialData: { bar: initialBar },
   });
 
   return (
@@ -31,10 +29,10 @@ export default function BreweryDetails({
       <div>
         <p className="text-muted-foreground mb-4 text-sm">Cover Image</p>
         <div className="bg-muted relative aspect-[21/9] w-full rounded-lg">
-          {brewery.coverImage ? (
+          {bar.coverImage ? (
             <Image
-              src={`${storageUrl}/${brewery.coverImage}`}
-              alt={`${brewery.name} cover`}
+              src={`${storageUrl}/${bar.coverImage}`}
+              alt={`${bar.name} cover`}
               className="h-full w-full rounded-lg object-cover"
               fill
             />
@@ -43,8 +41,8 @@ export default function BreweryDetails({
               <p className="text-muted-foreground text-sm">No cover image</p>
             </div>
           )}
-          <BreweryImageUpload
-            brewery={brewery}
+          <BarImageUpload
+            barId={bar.id}
             type="cover"
             className="top-[unset] -right-2 -bottom-2 size-12"
           />
@@ -55,18 +53,18 @@ export default function BreweryDetails({
         <p className="text-muted-foreground mb-4 text-sm">Logo</p>
         <div className="relative w-fit">
           <Avatar className="size-24">
-            <AvatarImage src={`${storageUrl}/${brewery.logo}`} />
+            <AvatarImage src={`${storageUrl}/${bar.logo}`} />
             <AvatarFallback className="bg-foreground text-background text-2xl uppercase">
-              {brewery.name?.charAt(0)}
+              {bar.name?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <BreweryImageUpload brewery={brewery} type="logo" />
+          <BarImageUpload barId={bar.id} type="logo" />
         </div>
       </div>
 
       <Separator />
 
-      <BreweryDetailsForm brewery={brewery} />
+      <BarDetailsForm bar={bar} />
     </div>
   );
 }

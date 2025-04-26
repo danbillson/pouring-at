@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { updateUser } from "@/lib/auth-client";
-import { uploadImage } from "@/lib/image-upload";
+import { updateUser } from "@/lib/auth/auth-client";
+import { uploadImage } from "@/lib/storage/image-upload";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";
 

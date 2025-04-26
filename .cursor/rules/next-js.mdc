@@ -9,12 +9,26 @@ alwaysApply: false
 - Client components must be explicitly marked with `'use client'` at the top of the file.
 - Use kebab-case for directory names (e.g., `components/auth-form`) and PascalCase for component files.
 - Prefer named exports over default exports, i.e. `export function Button() { /* ... */ }` instead of `export default function Button() { /* ... */ }`.
-- Minimize `'use client'` directives:
+
+## Data Fetching & Mutations
+
+- **Prioritize Server Components (RSCs) for Data Fetching:** Fetch initial page data directly within `async` Server Components (`page.tsx`, `layout.tsx`) using standard `async/await`. Avoid client-side fetching for initial data rendering.
+- **Use Server Actions for Mutations:** Implement all Create, Update, Delete (CRUD) operations and other server-side logic triggered by user interaction as Server Actions (`'use server';` directive, typically in `src/actions/`).
+- **Invalidate Cache with Revalidation:** After successful mutations in Server Actions, use `revalidatePath()` or `revalidateTag()` to invalidate the Next.js cache and trigger automatic data refetching in RSCs.
+- **Minimize API Routes for Internal Data:** Reserve API routes primarily for external consumers (e.g., webhooks, third-party APIs), not for internal data fetching or mutations within the Next.js app.
+- **Server Actions Returning Data:** For dynamic data fetching triggered within Client Components (e.g., search-as-you-type), use Server Actions that return the fetched data directly to the calling Client Component.
+
+## State Management & Loading
+
+- **URL Search Params for Server State:** Manage state that affects server-fetched data (pagination, filters, sorting) using URL Search Parameters. Client components should use `useRouter` (from `next/navigation`) to update the URL, triggering RSCs to re-fetch with new parameters. Use libraries like `nuqs` for easier management if needed.
+- **Route Loading with `loading.tsx`:** Use `loading.tsx` files alongside `page.tsx` to leverage React Suspense for automatic loading UI during route transitions and initial server component data fetching.
+- **Action Pending States:**
+    - In forms submitting via `<form action={...}>`, use the `useFormStatus` hook (from `react-dom`) in a dedicated child component (e.g., `<SubmitButton />`) to get pending state.
+    - For Server Actions called programmatically (e.g., `onClick={async () => { await myAction(); }}`), wrap the call in `startTransition` (from `useTransition`) to get pending state within the Client Component.
+- **Minimize Client-Side Server State Libraries:** Reduce reliance on libraries like React Query for standard data fetching and mutations, as RSCs + Server Actions + Revalidation cover most common use cases. Consider them only for advanced client-side caching needs or real-time client features.
+- **Minimize `'use client'` directives:**
   - Keep most components as React Server Components (RSC)
-  - Only use client components when you need interactivity and wrap in `Suspense` with fallback UI
-  - Create small client component wrappers around interactive elements
-- Avoid unnecessary `useState` and `useEffect` when possible:
-  - Use server components for data fetching
-  - Use React Server Actions for form handling
-  - Use URL search params for shareable state
-- Use `nuqs` for URL search param state management
+  - Only use client components when you need interactivity (state, effects, browser APIs).
+  - Wrap interactive client components in `<Suspense>` with fallback UI if they fetch data or are heavy.
+  - Create small client component wrappers around interactive elements rather than making large components client-side.
+- **Avoid unnecessary `useState` and `useEffect`:** Leverage Server Components and Server Actions where possible instead of managing server state on the client.

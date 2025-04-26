@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { bar, brewery, member as memberSchema } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { and, eq } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";

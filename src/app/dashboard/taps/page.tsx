@@ -1,6 +1,6 @@
 import { AddTap } from "@/components/add-tap";
-import { BeerDetail } from "@/components/dashboard/beer-detail";
-import { DeleteTapButton } from "@/components/dashboard/delete-tap-button";
+import { BeerDetail } from "@/components/dashboard/beers/beer-detail";
+import { DeleteTapButton } from "@/components/dashboard/taps/delete-tap-button";
 import {
   Card,
   CardContent,
@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBar } from "@/lib/access";
+import { hasAccessToBar } from "@/lib/auth/access";
 import { getTaps } from "@/lib/taps";
 
 export default async function TapsPage() {

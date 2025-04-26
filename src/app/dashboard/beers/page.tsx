@@ -1,9 +1,15 @@
-import { BeerList } from "@/components/dashboard/beer-list";
-import { hasAccessToBrewery } from "@/lib/access";
+import { BeerList } from "@/components/dashboard/beers/beer-list";
+import { hasAccessToBrewery } from "@/lib/auth/access";
 import { getBreweryBeers } from "@/lib/breweries";
+import { notFound } from "next/navigation";
 
 export default async function BreweryPage() {
   const brewery = await hasAccessToBrewery();
+
+  if (!brewery) {
+    notFound();
+  }
+
   const beers = await getBreweryBeers(brewery.id);
 
   return (

@@ -1,18 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { uploadImage } from "@/lib/image-upload";
-import { cn } from "@/lib/utils";
+import { uploadImage } from "@/lib/storage/image-upload";
+import { cn } from "@/lib/utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";
 
-interface BeerImageUploadProps {
-  beerId: string;
+type BarImageUploadProps = {
+  barId: string;
+  type: "logo" | "cover";
   className?: string;
-}
+};
 
-export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
+export function BarImageUpload({
+  barId,
+  type,
+  className,
+}: BarImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -27,9 +32,9 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
-            const path = `beers/${beerId}/logo.${extension}`;
+            const path = `bars/${barId}/${type}.${extension}`;
             const { data, error } = await uploadImage({
-              bucket: "logos",
+              bucket: type === "logo" ? "logos" : "covers",
               file,
               path,
             });
@@ -39,29 +44,33 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
               return;
             }
 
-            const response = await fetch(`/api/beers/${beerId}`, {
+            const body =
+              type === "logo"
+                ? { logo: data.fullPath }
+                : { coverImage: data.fullPath };
+
+            const response = await fetch(`/api/bars/${barId}`, {
               method: "PATCH",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ image: data.fullPath }),
+              body: JSON.stringify(body),
             });
 
             if (!response.ok) {
-              console.error("Failed to update beer");
+              console.error("Failed to update bar");
               return;
             }
 
-            // Invalidate the beer query to trigger a refetch
-            queryClient.invalidateQueries({ queryKey: ["beers", beerId] });
+            // Invalidate the bar query to trigger a refetch
+            queryClient.invalidateQueries({ queryKey: ["bars", barId] });
           }
         }}
       />
       <Button
-        type="button"
         variant="outline"
         className={cn(
-          "absolute right-2 bottom-2 size-8 rounded-full border-0",
+          "absolute top-0 right-0 size-8 rounded-full border-0",
           className
         )}
         onClick={() => inputRef.current?.click()}

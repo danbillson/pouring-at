@@ -1,5 +1,5 @@
 import { searchBars } from "@/lib/bars";
-import { geocodeLocation } from "@/lib/geocoding";
+import { geocodeLocation } from "@/lib/maps/geocoding";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

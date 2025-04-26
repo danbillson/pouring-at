@@ -1,4 +1,4 @@
-import BarDetails from "@/components/dashboard/bar-details";
+import { BarDetails } from "@/components/dashboard/bar/bar-details";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBar } from "@/lib/access";
+import { hasAccessToBar } from "@/lib/auth/access";
 import Link from "next/link";
 
 export default async function BarPage() {

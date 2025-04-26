@@ -1,9 +1,9 @@
-import { ProfileImageUpload } from "@/components/dashboard/profile-image-upload";
-import { SignOut } from "@/components/dashboard/sign-out";
+import { ProfileImageUpload } from "@/components/dashboard/profile/profile-image-upload";
+import { SignOut } from "@/components/dashboard/profile/sign-out";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 

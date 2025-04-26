@@ -1,4 +1,4 @@
-import BreweryDetails from "@/components/dashboard/brewery-details";
+import { BreweryDetails } from "@/components/dashboard/brewery/brewery-details";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBrewery } from "@/lib/access";
+import { hasAccessToBrewery } from "@/lib/auth/access";
 import Link from "next/link";
 
 export default async function BreweryPage() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Venue, VenueType } from "@/lib/venue";
+import type { Venue, VenueType } from "@/db/schema";
 import { createContext, useCallback, useContext, useState } from "react";
 
 const VENUE_COOKIE_NAME = "last_visited_venue";
