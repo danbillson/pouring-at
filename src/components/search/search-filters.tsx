@@ -11,39 +11,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { beerStyles } from "@/lib/constants/beer-style";
+import { searchFiltersParsers } from "@/lib/search-params";
 import { SlidersHorizontal } from "lucide-react";
-import { parseAsString, useQueryStates } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { useTransition } from "react";
 
-const filtersParsers = {
-  style: parseAsString.withDefault(""),
-  brewery: parseAsString.withDefault(""),
-};
-
 export function SearchFilters() {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
-  const [filters, setFilters] = useQueryStates(filtersParsers, {
+  const [filters, setFilters] = useQueryStates(searchFiltersParsers, {
     startTransition,
+    shallow: false,
     history: "push",
   });
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-4">
       <h1 className="text-2xl font-bold">Search</h1>
-      {isPending && (
-        <span className="text-muted-foreground text-sm">Updating...</span>
-      )}
       <div className="xs:grid-cols-[16px_1fr_1fr] grid w-full max-w-[400px] items-center gap-4">
         <SlidersHorizontal className="xs:block hidden h-4 w-4" />
         <BrewerySelect
-          value={filters.brewery}
-          onChange={(value) => setFilters({ brewery: value || "" })}
+          value={filters.brewery || ""}
+          onChange={(value) => setFilters({ brewery: value })}
         />
         <Select
-          onValueChange={(value) => setFilters({ style: value || "" })}
-          value={filters.style}
-          disabled={isPending}
+          onValueChange={(value) => setFilters({ style: value })}
+          value={filters.style || ""}
         >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Beer style" />

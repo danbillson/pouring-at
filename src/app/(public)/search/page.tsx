@@ -3,28 +3,25 @@ import { BarMapList } from "@/components/bars/bar-map-list";
 import { SearchFilters } from "@/components/search/search-filters";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { geocodeLocation } from "@/lib/maps/geocoding";
+import { searchParamsCache } from "@/lib/search-params";
 import { Terminal } from "lucide-react";
+import { type SearchParams } from "nuqs/server";
 
 interface SearchPageProps {
-  searchParams?: Promise<{
-    location?: string;
-    style?: string;
-    brewery?: string;
-  }>;
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const locationQuery = (await searchParams)?.location;
-  const style = (await searchParams)?.style;
-  const brewery = (await searchParams)?.brewery;
+  const { location, style, brewery } =
+    await searchParamsCache.parse(searchParams);
 
   let bars: BarWithTaps[] = [];
   let center = { lat: 51.5074, lng: -0.1278 };
   let initialError: string | null = null;
 
-  if (locationQuery) {
+  if (location) {
     try {
-      center = await geocodeLocation(locationQuery);
+      center = await geocodeLocation(location);
       bars = await searchBars({
         lat: center.lat,
         lng: center.lng,
@@ -56,14 +53,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </Alert>
           )}
 
-          {locationQuery && !initialError ? (
+          {location && !initialError ? (
             <BarMapList
               bars={bars}
               center={center}
               initialStyle={style}
               initialBrewery={brewery}
             />
-          ) : !locationQuery ? (
+          ) : !location ? (
             <div className="flex h-[300px] items-center justify-center rounded-lg border border-dashed">
               <p className="text-muted-foreground">
                 Enter a location above to search for bars.
