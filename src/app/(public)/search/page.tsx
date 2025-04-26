@@ -1,108 +1,76 @@
-"use client";
-
+import { BarWithTaps, searchBars } from "@/actions/bar";
 import { BarMapList } from "@/components/bars/bar-map-list";
-import { BrewerySelect } from "@/components/search/brewery-select";
-import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { beerStyles } from "@/lib/constants/beer-style";
-import { SlidersHorizontal } from "lucide-react";
-import { useQueryState } from "nuqs";
-import { Suspense } from "react";
+import { SearchFilters } from "@/components/search/search-filters";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { geocodeLocation } from "@/lib/maps/geocoding";
+import { Terminal } from "lucide-react";
 
-function SearchContent() {
-  const [location] = useQueryState("location");
-  const [style, setStyle] = useQueryState("style");
-  const [brewery, setBrewery] = useQueryState("brewery");
-
-  const handleBreweryChange = async (newBreweryValue: string | null) => {
-    await setBrewery(newBreweryValue || null);
-  };
-
-  const handleStyleChange = async (newStyleValue: string) => {
-    await setStyle(newStyleValue || null);
-  };
-
-  return (
-    <div className="grid gap-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-4 px-4">
-        <h1 className="text-2xl font-bold">Search</h1>
-        <div className="xs:grid-cols-[16px_1fr_1fr] grid w-full max-w-[400px] items-center gap-4">
-          <SlidersHorizontal className="xs:block hidden h-4 w-4" />
-
-          <BrewerySelect value={brewery || ""} onChange={handleBreweryChange} />
-
-          <Select onValueChange={handleStyleChange} value={style || ""}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Beer style" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(beerStyles).map(([category, styles]) => (
-                <SelectGroup key={category}>
-                  <SelectLabel>{category.split("_").join(" ")}</SelectLabel>
-                  {styles.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {location && (
-        <BarMapList
-          location={location}
-          style={style || undefined}
-          brewery={brewery || undefined}
-        />
-      )}
-    </div>
-  );
+interface SearchPageProps {
+  searchParams?: Promise<{
+    location?: string;
+    style?: string;
+    brewery?: string;
+  }>;
 }
 
-function SearchFallback() {
-  return (
-    <div className="grid gap-8">
-      <div className="mx-auto">
-        <Card className="w-[400px] p-4">
-          <Skeleton className="h-10 w-full" />
-          <div className="mt-4 grid gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </Card>
-      </div>
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const locationQuery = (await searchParams)?.location;
+  const style = (await searchParams)?.style;
+  const brewery = (await searchParams)?.brewery;
 
-      <div className="grid h-full lg:grid-cols-[400px_1fr]">
-        <div className="space-y-4 pr-2">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-        <Skeleton className="h-[600px] w-full" />
-      </div>
-    </div>
-  );
-}
+  let bars: BarWithTaps[] = [];
+  let center = { lat: 51.5074, lng: -0.1278 };
+  let initialError: string | null = null;
 
-export default function SearchPage() {
+  if (locationQuery) {
+    try {
+      center = await geocodeLocation(locationQuery);
+      bars = await searchBars({
+        lat: center.lat,
+        lng: center.lng,
+        style: style,
+        brewery: brewery,
+      });
+      console.log("bars", bars);
+    } catch (error) {
+      console.error("Search page error:", error);
+      initialError =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch search results.";
+      bars = [];
+    }
+  }
+
   return (
     <div className="min-h-[calc(100vh-68px)]">
       <div className="container mx-auto py-8">
-        <Suspense fallback={<SearchFallback />}>
-          <SearchContent />
-        </Suspense>
+        <div className="grid gap-8">
+          <SearchFilters />
+
+          {initialError && (
+            <Alert variant="destructive" className="mx-auto max-w-lg">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Search Error</AlertTitle>
+              <AlertDescription>{initialError}</AlertDescription>
+            </Alert>
+          )}
+
+          {locationQuery && !initialError ? (
+            <BarMapList
+              bars={bars}
+              center={center}
+              initialStyle={style}
+              initialBrewery={brewery}
+            />
+          ) : !locationQuery ? (
+            <div className="flex h-[300px] items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground">
+                Enter a location above to search for bars.
+              </p>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );
