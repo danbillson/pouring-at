@@ -1,5 +1,6 @@
 "use client";
 
+import { createBarAction } from "@/actions/bar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,27 +18,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createBar } from "@/lib/bars";
+import { createBarSchema, type CreateBarValues } from "@/lib/schemas/bar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const createBarSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  addressLine1: z.string().min(1, "Address is required"),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  postcode: z
-    .string()
-    .min(1, "Postcode is required")
-    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
-      message: "Invalid UK postcode format",
-    }),
-});
-
-type CreateBarValues = z.infer<typeof createBarSchema>;
 
 export function CreateBarForm() {
   const router = useRouter();
@@ -54,13 +39,15 @@ export function CreateBarForm() {
 
   async function onSubmit(data: CreateBarValues) {
     try {
-      const result = await createBar(data);
+      const result = await createBarAction(data);
 
-      if (!result.success || !result.data) {
-        throw new Error(result.error);
+      if (!result.success) {
+        throw new Error(result.error || "An unknown error occurred");
       }
 
-      router.push(`/bars/${result.data.id}`);
+      toast.success("Bar created successfully!");
+      router.push(`/bars/${result.data?.id}`);
+      form.reset();
     } catch (error) {
       console.error("Failed to create bar:", error);
       toast.error(

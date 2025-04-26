@@ -2,19 +2,12 @@
 
 import { db } from "@/db";
 import { bar, beer, brewery, tap } from "@/db/schema";
-import { geocodeAddress } from "@/lib/maps/geocoding"; // Assuming this stays in lib/maps
+import { geocodeAddress } from "@/lib/maps/geocoding";
+import { createBarSchema, type CreateBarValues } from "@/lib/schemas/bar";
 import { eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache"; // Will be needed for mutations
+import { revalidatePath } from "next/cache";
 
 // --- Fetching Helpers ---
-
-export type CreateBarInput = {
-  name: string;
-  addressLine1: string;
-  addressLine2?: string;
-  city: string;
-  postcode: string;
-};
 
 export async function getBar(id: string) {
   return await db.query.bar.findFirst({
@@ -129,17 +122,28 @@ export async function searchBars({
 
 // --- Mutation Actions ---
 
-export async function createBarAction(data: CreateBarInput) {
+export async function createBarAction(data: CreateBarValues) {
+  // 1. Validate input on the server using the shared schema
+  const validationResult = createBarSchema.safeParse(data);
+  if (!validationResult.success) {
+    // Extract specific Zod errors if needed, or return a generic message
+    // console.error("Validation failed:", validationResult.error.flatten());
+    return { success: false, error: "Invalid form data submitted." };
+  }
+
+  // Use validatedData from now on
+  const validatedData = validationResult.data;
+
   // TODO: Add Authentication/Authorization if needed
   // const session = await auth.api.getSession(...);
   // if (!session?.user) { return { success: false, error: "Unauthorized" }; }
 
   try {
     const { lat, lng } = await geocodeAddress({
-      addressLine1: data.addressLine1,
-      addressLine2: data.addressLine2,
-      city: data.city,
-      postcode: data.postcode,
+      addressLine1: validatedData.addressLine1,
+      addressLine2: validatedData.addressLine2,
+      city: validatedData.city,
+      postcode: validatedData.postcode,
     });
 
     if (!lat || !lng) {
@@ -154,14 +158,14 @@ export async function createBarAction(data: CreateBarInput) {
     const [barData] = await db
       .insert(bar)
       .values({
-        name: data.name,
+        name: validatedData.name,
         // slug: slug,
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2 || null,
-        city: data.city,
-        postcode: data.postcode,
+        addressLine1: validatedData.addressLine1,
+        addressLine2: validatedData.addressLine2 || null,
+        city: validatedData.city,
+        postcode: validatedData.postcode,
         location: sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`,
-        formattedAddress: `${data.addressLine1}${data.addressLine2 ? `, ${data.addressLine2}` : ""}, ${data.city}, ${data.postcode}`,
+        formattedAddress: `${validatedData.addressLine1}${validatedData.addressLine2 ? `, ${validatedData.addressLine2}` : ""}, ${validatedData.city}, ${validatedData.postcode}`,
         // createdById: session.user.id, // Add if tracking creator
         // organizationId: session.user.organizationId, // If applicable
       })
