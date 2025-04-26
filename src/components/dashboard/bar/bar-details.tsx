@@ -1,7 +1,7 @@
 "use client";
 
-import { BarDetailsForm } from "@/components/dashboard/bar-details-form";
-import { BarImageUpload } from "@/components/dashboard/bar-image-upload";
+import { BarDetailsForm } from "@/components/dashboard/bar/bar-details-form";
+import { BarImageUpload } from "@/components/dashboard/bar/bar-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Bar } from "@/db/schema";
@@ -14,7 +14,7 @@ type BarDetailsProps = {
   bar: Bar;
 };
 
-export default function BarDetails({ bar: initialBar }: BarDetailsProps) {
+export function BarDetails({ bar: initialBar }: BarDetailsProps) {
   const {
     data: { bar },
   } = useQuery({

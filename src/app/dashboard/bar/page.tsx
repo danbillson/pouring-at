@@ -1,4 +1,4 @@
-import BarDetails from "@/components/dashboard/bar-details";
+import { BarDetails } from "@/components/dashboard/bar/bar-details";
 import { Button } from "@/components/ui/button";
 import {
   Card,
