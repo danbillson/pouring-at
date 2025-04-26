@@ -1,7 +1,7 @@
 "use client";
 
-import { BreweryDetailsForm } from "@/components/dashboard/brewery-details-form";
-import { BreweryImageUpload } from "@/components/dashboard/brewery-image-upload";
+import { BreweryDetailsForm } from "@/components/dashboard/brewery/brewery-details-form";
+import { BreweryImageUpload } from "@/components/dashboard/brewery/brewery-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Brewery } from "@/db/schema";
@@ -14,7 +14,7 @@ type BreweryDetailsProps = {
   brewery: Brewery;
 };
 
-export default function BreweryDetails({
+export function BreweryDetails({
   brewery: initialBrewery,
 }: BreweryDetailsProps) {
   const {

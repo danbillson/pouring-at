@@ -1,4 +1,4 @@
-import BreweryDetails from "@/components/dashboard/brewery-details";
+import { BreweryDetails } from "@/components/dashboard/brewery/brewery-details";
 import { Button } from "@/components/ui/button";
 import {
   Card,
