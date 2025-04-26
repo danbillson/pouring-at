@@ -160,6 +160,12 @@ export const brewery = pgTable(
 
 export type Brewery = typeof brewery.$inferSelect;
 
+export type VenueType = "bar" | "brewery";
+
+export type Venue = {
+  type: VenueType;
+} & (Bar | Brewery);
+
 export const beer = pgTable("beer", {
   id: text("id")
     .primaryKey()

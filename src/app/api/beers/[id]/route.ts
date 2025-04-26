@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { beer } from "@/db/schema";
-import { hasAccessToBrewery } from "@/lib/access";
-import { auth } from "@/lib/auth";
+import { hasAccessToBrewery } from "@/lib/auth/access";
+import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

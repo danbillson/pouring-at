@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBar } from "@/lib/access";
+import { hasAccessToBar } from "@/lib/auth/access";
 import Link from "next/link";
 
 export default async function BarPage() {

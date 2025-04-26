@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBrewery } from "@/lib/access";
+import { hasAccessToBrewery } from "@/lib/auth/access";
 import Link from "next/link";
 
 export default async function BreweryPage() {

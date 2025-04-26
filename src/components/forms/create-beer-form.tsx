@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { beerStyles } from "@/lib/beer-style";
 import { createBeer } from "@/lib/beers";
 import { createBrewery } from "@/lib/breweries";
+import { beerStyles } from "@/lib/constants/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

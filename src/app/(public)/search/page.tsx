@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { beerStyles } from "@/lib/beer-style";
+import { beerStyles } from "@/lib/constants/beer-style";
 import { SlidersHorizontal } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { Suspense } from "react";

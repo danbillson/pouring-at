@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { Bar, bar } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { Brewery } from "@/lib/breweries";
 import { and, eq, ilike } from "drizzle-orm";
 import { headers } from "next/headers";

@@ -21,8 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { beerStyles } from "@/lib/beer-style";
-import { uploadImage } from "@/lib/image-upload";
+import { beerStyles } from "@/lib/constants/beer-style";
+import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Beer } from "@/db/schema";
-import { beerStyles } from "@/lib/beer-style";
+import { beerStyles } from "@/lib/constants/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useForm } from "react-hook-form";

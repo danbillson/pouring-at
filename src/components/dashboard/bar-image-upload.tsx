@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { uploadImage } from "@/lib/image-upload";
-import { cn } from "@/lib/utils";
+import { uploadImage } from "@/lib/storage/image-upload";
+import { cn } from "@/lib/utils/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";

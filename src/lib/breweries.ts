@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { beer, brewery } from "@/db/schema";
-import { geocodeAddress } from "@/lib/geocoding";
+import { geocodeAddress } from "@/lib/maps/geocoding";
 import { eq, sql } from "drizzle-orm";
 
 export type Brewery = {

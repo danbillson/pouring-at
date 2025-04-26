@@ -1,5 +1,5 @@
 import { BeerList } from "@/components/dashboard/beer-list";
-import { hasAccessToBrewery } from "@/lib/access";
+import { hasAccessToBrewery } from "@/lib/auth/access";
 import { getBreweryBeers } from "@/lib/breweries";
 import { notFound } from "next/navigation";
 

@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { beer as beerSchema } from "@/db/schema";
-import { hasAccessToBrewery } from "@/lib/access";
+import { hasAccessToBrewery } from "@/lib/auth/access";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 

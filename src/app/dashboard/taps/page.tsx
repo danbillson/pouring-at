@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { hasAccessToBar } from "@/lib/access";
+import { hasAccessToBar } from "@/lib/auth/access";
 import { getTaps } from "@/lib/taps";
 
 export default async function TapsPage() {

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { bar } from "@/db/schema";
-import { hasAccessToBar } from "@/lib/access";
-import { auth } from "@/lib/auth";
+import { hasAccessToBar } from "@/lib/auth/access";
+import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
