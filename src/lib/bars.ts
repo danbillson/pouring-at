@@ -86,7 +86,7 @@ export async function searchBars({
   lng,
   radius = 5, // Default 5km radius
   style,
-  brewery: brewerySlug,
+  brewery: breweryId,
 }: SearchParams) {
   const point = sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`;
 
@@ -119,7 +119,7 @@ export async function searchBars({
       INNER JOIN ${brewery} br ON br.id = be.brewery_id
       WHERE t.tapped_off IS NULL
       ${style ? sql`AND be.style = ${style}` : sql``}
-      ${brewerySlug ? sql`AND br.slug = ${brewerySlug}` : sql``}
+      ${breweryId ? sql`AND br.id = ${breweryId}` : sql``}
     ),
     bar_taps AS (
       SELECT 
@@ -155,7 +155,7 @@ export async function searchBars({
       nb.cover_image,
       COALESCE(bt.taps, '[]'::json) AS taps
     FROM nearby_bars nb
-    ${style || brewerySlug ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
+    ${style || breweryId ? sql`INNER JOIN matching_bars mb ON mb.bar_id = nb.bar_id` : sql``}
     LEFT JOIN bar_taps bt ON bt.bar_id = nb.bar_id
     ORDER BY nb.distance_km ASC
     LIMIT 20

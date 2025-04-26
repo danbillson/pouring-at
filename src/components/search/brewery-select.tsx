@@ -95,7 +95,7 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
         >
           {value
             ? (selectedBrewery?.name ??
-              breweries.find((brewery) => brewery.slug === value)?.name ??
+              breweries.find((brewery) => brewery.id === value)?.name ??
               name ??
               "Loading...")
             : "Brewery"}
@@ -114,8 +114,8 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
           <CommandList>
             {breweries.map((brewery) => (
               <CommandItem
-                key={brewery.slug}
-                value={brewery.slug}
+                key={brewery.id}
+                value={brewery.id}
                 onSelect={(currentValue) => {
                   onChange(currentValue);
                   setOpen(false);
