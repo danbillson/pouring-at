@@ -39,6 +39,8 @@ export function BeerList({ beers, brewery }: BeerListProps) {
       beer.style?.toLowerCase().includes(filter.toLowerCase())
   );
 
+  console.log(filteredBeers);
+
   return (
     <>
       <Card>

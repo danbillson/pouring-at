@@ -64,6 +64,13 @@
       "when": 1745253316216,
       "tag": "0008_tough_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1745657660627,
+      "tag": "0009_eminent_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

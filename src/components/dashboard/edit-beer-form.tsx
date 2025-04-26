@@ -19,13 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Beer } from "@/db/schema";
 import { beerStyles } from "@/lib/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { BeerImageUpload } from "./beer-image-upload";
+
+const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
 
 const editBeerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -86,6 +91,26 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="relative">
+          <div className="bg-muted relative aspect-square w-full rounded-lg">
+            {beer.image ? (
+              <Image
+                src={`${storageUrl}/${beer.image}`}
+                alt={beer.name}
+                className="rounded-lg object-cover"
+                fill
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <p className="text-muted-foreground text-sm">No image</p>
+              </div>
+            )}
+            <BeerImageUpload beerId={beer.id} />
+          </div>
+        </div>
+
+        <Separator className="my-8" />
+
         <FormField
           control={form.control}
           name="name"
