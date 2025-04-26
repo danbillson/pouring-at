@@ -1,5 +1,6 @@
 "use client";
 
+import { updateBeerAction } from "@/actions/beer";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import { Beer } from "@/db/schema";
 import { beerStyles } from "@/lib/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -47,7 +47,6 @@ interface EditBeerFormProps {
 }
 
 export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
-  const queryClient = useQueryClient();
   const form = useForm<EditBeerValues>({
     resolver: zodResolver(editBeerSchema),
     defaultValues: {
@@ -58,28 +57,24 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
     },
   });
 
+  const { isSubmitting } = form.formState;
+
   async function onSubmit(data: EditBeerValues) {
     try {
-      const response = await fetch(`/api/beers/${beer.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          style: data.style,
-          abv: data.abv ? parseFloat(data.abv) : undefined,
-          description: data.description,
-        }),
+      const result = await updateBeerAction(beer.id, {
+        name: data.name,
+        style: data.style,
+        abv: String(parseFloat(data.abv || "0")),
+        description: data.description,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to update beer");
+      if (!result.success) {
+        toast.error(result.error || "Failed to update beer");
+        return;
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["beers"] });
       toast.success("Beer updated successfully");
-      onSuccess?.();
+      onSuccess?.(); // Close drawer/modal
     } catch (error) {
       console.error("Failed to update beer:", error);
       toast.error(
@@ -95,6 +90,7 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
           <div className="bg-muted relative aspect-square w-full rounded-lg">
             {beer.image ? (
               <Image
+                key={beer.image}
                 src={`${storageUrl}/${beer.image}`}
                 alt={beer.name}
                 className="rounded-lg object-cover"
@@ -174,12 +170,8 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
           )}
         />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </form>
     </Form>

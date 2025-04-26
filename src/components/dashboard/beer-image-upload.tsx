@@ -1,11 +1,12 @@
 "use client";
 
+import { updateBeerAction } from "@/actions/beer";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/lib/image-upload";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";
+import { toast } from "sonner";
 
 interface BeerImageUploadProps {
   beerId: string;
@@ -14,7 +15,6 @@ interface BeerImageUploadProps {
 
 export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
   return (
     <>
@@ -25,35 +25,44 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
         accept="image/png, image/jpeg, image/webp"
         onChange={async (e) => {
           const file = e.target.files?.[0];
-          const extension = file?.type.split("/")[1];
-          if (file && extension) {
-            const path = `beers/${beerId}/logo.${extension}`;
-            const { data, error } = await uploadImage({
-              bucket: "logos",
-              file,
-              path,
-            });
+          if (!file) return;
 
-            if (error) {
-              console.error(error);
-              return;
-            }
+          const extension = file.type.split("/")[1];
+          if (!extension) {
+            toast.error("Invalid image file type.");
+            return;
+          }
 
-            const response = await fetch(`/api/beers/${beerId}`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ image: data.fullPath }),
-            });
+          const path = `beers/${beerId}/logo.${extension}`;
+          // Perform the upload
+          const { data: uploadData, error: uploadError } = await uploadImage({
+            bucket: "logos",
+            file,
+            path,
+          });
 
-            if (!response.ok) {
-              console.error("Failed to update beer");
-              return;
-            }
+          if (uploadError || !uploadData?.fullPath) {
+            console.error("Image upload failed:", uploadError);
+            toast.error("Failed to upload image.");
+            return;
+          }
 
-            // Invalidate the beer query to trigger a refetch
-            queryClient.invalidateQueries({ queryKey: ["beers", beerId] });
+          // Update the beer record using the Server Action
+          const updateResult = await updateBeerAction(beerId, {
+            image: uploadData.fullPath,
+          });
+
+          if (!updateResult.success) {
+            console.error(
+              "Failed to update beer with image path:",
+              updateResult.error
+            );
+            toast.error(
+              updateResult.error || "Failed to save image path to beer."
+            );
+          } else {
+            toast.success("Beer image updated.");
+            // Revalidation is handled by the Server Action
           }
         }}
       />

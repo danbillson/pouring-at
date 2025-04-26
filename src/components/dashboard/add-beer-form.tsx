@@ -1,5 +1,6 @@
 "use client";
 
+import { createBeerAction, updateBeerAction } from "@/actions/beer";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,12 +22,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { beerStyles } from "@/lib/beer-style";
-import { createBeer } from "@/lib/beers";
 import { uploadImage } from "@/lib/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -45,8 +45,16 @@ interface AddBeerFormProps {
   onSuccess?: () => void;
 }
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full" disabled={pending}>
+      {pending ? "Creating..." : "Create Beer"}
+    </Button>
+  );
+}
+
 export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
-  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<File>();
   const [previewUrl, setPreviewUrl] = useState<string>();
@@ -60,51 +68,68 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
     },
   });
 
-  async function onSubmit(data: AddBeerValues) {
+  // Use a ref for the form to reset it later if needed
+  const formRef = useRef<HTMLFormElement>(null);
+
+  async function handleSubmitAction(_formData: FormData) {
+    const values = form.getValues();
+
     try {
-      const result = await createBeer({
-        name: data.name,
-        style: data.style,
-        abv: parseFloat(data.abv || "0"),
-        description: data.description,
+      const result = await createBeerAction({
+        name: values.name,
+        style: values.style,
+        abv: parseFloat(values.abv || "0"),
+        description: values.description,
         breweryId,
       });
 
       if (!result.success || !result.beer) {
-        toast.error(result.error);
+        toast.error(result.error || "Failed to create beer");
         return;
       }
 
+      toast.success("Beer created successfully");
+
       if (selectedImage) {
         const extension = selectedImage.type.split("/")[1];
-        const path = `beers/${result.beer.id}/logo.${extension}`;
-        const { data: uploadData, error } = await uploadImage({
-          bucket: "logos",
-          file: selectedImage,
-          path,
-        });
+        if (!extension) {
+          toast.error("Invalid image file type.");
+        } else {
+          const path = `beers/${result.beer.id}/logo.${extension}`;
+          const { data: uploadData, error: uploadError } = await uploadImage({
+            bucket: "logos",
+            file: selectedImage,
+            path,
+          });
 
-        if (error) {
-          console.error(error);
-          return;
-        }
+          if (uploadError) {
+            console.error("Image upload failed:", uploadError);
+            toast.warning("Beer created, but image upload failed.");
+          } else if (uploadData?.fullPath) {
+            // Update the beer record with the image path
+            const updateResult = await updateBeerAction(result.beer.id, {
+              image: uploadData.fullPath,
+            });
 
-        const imageResponse = await fetch(`/api/beers/${result.beer.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ image: uploadData.fullPath }),
-        });
-
-        if (!imageResponse.ok) {
-          console.error("Failed to update beer image");
-          return;
+            if (!updateResult.success) {
+              toast.error(
+                updateResult.error || "Failed to save image path to beer."
+              );
+              console.error(
+                "Failed to update beer with image path:",
+                updateResult.error
+              );
+            } else {
+              toast.success("Beer image saved.");
+            }
+          }
         }
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["beers"] });
-      toast.success("Beer created successfully");
+      form.reset();
+      setSelectedImage(undefined);
+      setPreviewUrl(undefined);
+
       onSuccess?.();
     } catch (error) {
       console.error("Failed to create beer:", error);
@@ -116,7 +141,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form ref={formRef} action={handleSubmitAction} className="space-y-4">
         <div className="bg-muted relative aspect-square w-full rounded-lg">
           <input
             type="file"
@@ -219,13 +244,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
           )}
         />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? "Creating..." : "Create Beer"}
-        </Button>
+        <SubmitButton />
       </form>
     </Form>
   );
