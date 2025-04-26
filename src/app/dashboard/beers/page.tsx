@@ -9,7 +9,7 @@ export default async function BreweryPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="grid gap-8">
-        <BeerList beers={beers} brewery={brewery.name} />
+        <BeerList beers={beers} brewery={brewery} />
       </div>
     </div>
   );

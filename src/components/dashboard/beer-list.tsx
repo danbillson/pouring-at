@@ -14,17 +14,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Beer } from "@/db/schema";
+import { Beer, Brewery } from "@/db/schema";
 import { MoreVertical, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { AddBeerDrawer } from "./add-beer-drawer";
 import { BeerDetail } from "./beer-detail";
 import { DeleteBeerDialog } from "./delete-beer-dialog";
 import { EditBeerDrawer } from "./edit-beer-drawer";
 
 interface BeerListProps {
   beers: Beer[];
-  brewery: string;
+  brewery: Brewery;
 }
 
 export function BeerList({ beers, brewery }: BeerListProps) {
@@ -39,12 +40,10 @@ export function BeerList({ beers, brewery }: BeerListProps) {
       beer.style?.toLowerCase().includes(filter.toLowerCase())
   );
 
-  console.log(filteredBeers);
-
   return (
     <>
       <Card>
-        <CardHeader className="grid grid-cols-2 items-center justify-between">
+        <CardHeader className="grid grid-cols-[1fr_1fr_auto] items-center justify-between gap-4">
           <div>
             <CardTitle>Beers</CardTitle>
             <CardDescription>View and manage your beers.</CardDescription>
@@ -58,6 +57,7 @@ export function BeerList({ beers, brewery }: BeerListProps) {
               className="pl-8"
             />
           </div>
+          <AddBeerDrawer breweryId={brewery.id} />
         </CardHeader>
         <CardContent>
           <ul>
@@ -66,7 +66,7 @@ export function BeerList({ beers, brewery }: BeerListProps) {
                 key={beer.id}
                 className="flex items-center justify-between gap-4 py-4"
               >
-                <BeerDetail beer={beer} brewery={brewery} />
+                <BeerDetail beer={beer} brewery={brewery.name} />
                 <DropdownMenu>
                   <DropdownMenuTrigger className="hover:bg-accent cursor-pointer rounded-md p-2">
                     <MoreVertical className="size-4" />
