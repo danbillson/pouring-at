@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { brewery } from "@/db/schema";
+import { beer, brewery } from "@/db/schema";
 import { geocodeAddress } from "@/lib/geocoding";
 import { eq, sql } from "drizzle-orm";
 
@@ -25,6 +25,13 @@ export async function getBrewery(id: string) {
     where: eq(brewery.id, id),
   });
   return breweryData;
+}
+
+export async function getBreweryBeers(breweryId: string) {
+  const beers = await db.query.beer.findMany({
+    where: eq(beer.breweryId, breweryId),
+  });
+  return beers;
 }
 
 export async function createBrewery(data: CreateBreweryInput) {

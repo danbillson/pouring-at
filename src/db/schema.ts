@@ -171,6 +171,7 @@ export const beer = pgTable("beer", {
   abv: decimal("abv", { precision: 3, scale: 1 }),
   style: text("style"),
   description: text("description"),
+  image: text("image"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
