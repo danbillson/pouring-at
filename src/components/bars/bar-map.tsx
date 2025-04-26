@@ -1,6 +1,6 @@
 "use client";
 
-import type { BarWithTaps } from "@/lib/bars";
+import type { BarWithTaps } from "@/actions/bar";
 import { Map, Marker } from "@vis.gl/react-google-maps";
 
 type BarMapProps = {

@@ -1,5 +1,6 @@
 "use client";
 
+import type { BarWithTaps } from "@/actions/bar";
 import { BarCover } from "@/components/bars/bar-cover";
 import {
   Card,
@@ -8,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { BarWithTaps } from "@/lib/bars";
 import { cn } from "@/lib/utils/utils";
 import Link from "next/link";
 
