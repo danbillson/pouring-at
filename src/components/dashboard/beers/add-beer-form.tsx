@@ -25,6 +25,7 @@ import { beerStyles } from "@/lib/constants/beer-style";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
@@ -71,7 +72,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
   // Use a ref for the form to reset it later if needed
   const formRef = useRef<HTMLFormElement>(null);
 
-  async function handleSubmitAction(_formData: FormData) {
+  async function handleSubmitAction() {
     const values = form.getValues();
 
     try {
@@ -157,10 +158,11 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
             }}
           />
           {previewUrl ? (
-            <img
+            <Image
               src={previewUrl}
               alt="Preview"
-              className="absolute inset-0 size-full rounded-lg object-cover"
+              fill
+              className="rounded-lg object-cover"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
