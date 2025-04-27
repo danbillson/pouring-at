@@ -1,7 +1,6 @@
 "use client";
 
 import { createBeerAction } from "@/actions/beer";
-import { BeerStyleSelect } from "@/components/forms/beer-style-select";
 import { BrewerySearch } from "@/components/search/brewery-search";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +12,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { beerStyles } from "@/lib/constants/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -142,14 +151,27 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
           control={form.control}
           name="style"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem>
               <FormLabel>Style</FormLabel>
-              <FormControl>
-                <BeerStyleSelect
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a style" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.entries(beerStyles).map(([category, styles]) => (
+                    <SelectGroup key={category}>
+                      <SelectLabel>{category.split("_").join(" ")}</SelectLabel>
+                      {styles.map((style) => (
+                        <SelectItem key={style} value={style}>
+                          {style}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

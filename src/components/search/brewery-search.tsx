@@ -1,5 +1,6 @@
 "use client";
 
+import { getBreweryAction, searchBreweriesAction } from "@/actions/brewery";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -12,11 +13,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Brewery } from "@/lib/breweries";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface BrewerySearchProps {
   value?: string;
@@ -25,16 +24,10 @@ interface BrewerySearchProps {
   onCreateNew?: () => void;
 }
 
-async function searchBreweries(search: string) {
-  if (!search) return [];
-  const response = await fetch(
-    `/api/breweries/search?q=${encodeURIComponent(search)}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch breweries");
-  }
-  const data = await response.json();
-  return data.breweries as Brewery[];
+interface SearchedBrewery {
+  id: string;
+  name: string;
+  slug: string | null;
 }
 
 // The BrewerySearch component is used to search for breweries by name with
@@ -46,22 +39,43 @@ export function BrewerySearch({
   onCreateNew,
 }: BrewerySearchProps) {
   const [open, setOpen] = useState(false);
-  const [debouncedSearch, setDebouncedSearch] = useState(name || "");
+  const [isPending, startTransition] = useTransition();
+  const [searchResults, setSearchResults] = useState<SearchedBrewery[]>([]);
+  const [selectedBrewery, setSelectedBrewery] =
+    useState<SearchedBrewery | null>(null);
 
-  const { data: breweries = [] } = useQuery({
-    queryKey: ["breweries", debouncedSearch],
-    queryFn: () => searchBreweries(debouncedSearch),
-    enabled: debouncedSearch.length > 0,
-  });
+  // Load initial brewery if value is provided
+  useEffect(() => {
+    if (value) {
+      startTransition(async () => {
+        const result = await getBreweryAction(value);
+        if (result.success && result.data) {
+          const { id, name, slug } = result.data;
+          setSelectedBrewery({ id, name, slug });
+        }
+      });
+    }
+  }, [value]);
+
+  const runSearch = async (query: string) => {
+    const result = await searchBreweriesAction(query);
+    if (result.success && result.data) {
+      setSearchResults(
+        result.data.map(({ id, name, slug }) => ({ id, name, slug }))
+      );
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   const setSearchDebouncer = useAsyncDebouncer(
-    (value: string) => {
-      setDebouncedSearch(value);
-      onChange({ name: value });
+    async (value: string) => {
+      startTransition(() => {
+        runSearch(value);
+        onChange({ name: value });
+      });
     },
-    {
-      wait: 300,
-    }
+    { wait: 300 }
   );
 
   useEffect(() => {
@@ -79,11 +93,13 @@ export function BrewerySearch({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={isPending}
         >
           {value
-            ? (breweries.find((brewery) => brewery.id === value)?.name ??
+            ? (selectedBrewery?.name ??
+              searchResults.find((brewery) => brewery.id === value)?.name ??
               name ??
-              debouncedSearch)
+              "Loading...")
             : "Select brewery..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -98,14 +114,14 @@ export function BrewerySearch({
           />
 
           <CommandList>
-            {breweries.map((brewery) => (
+            {searchResults.map((brewery) => (
               <CommandItem
                 key={brewery.id}
                 value={brewery.id}
                 onSelect={(currentValue) => {
                   const selected =
                     currentValue === value
-                      ? { name: debouncedSearch }
+                      ? { name: brewery.name }
                       : { id: currentValue, name: brewery.name };
                   onChange(selected);
                   setOpen(false);
