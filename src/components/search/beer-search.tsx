@@ -13,7 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Beer } from "@/db/schema";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";

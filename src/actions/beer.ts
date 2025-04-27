@@ -186,7 +186,7 @@ export async function updateBeerAction(id: string, data: UpdateBeerValues) {
       return { success: false, error: "Beer not found." };
     }
 
-    const updateData: Record<string, any> = { ...validatedData };
+    const updateData: Record<string, unknown> = { ...validatedData };
     if (validatedData.abv !== undefined) {
       updateData.abv =
         validatedData.abv !== null ? validatedData.abv.toString() : null;

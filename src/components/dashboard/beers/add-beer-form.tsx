@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { beerStyles } from "@/lib/constants/beer-style";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
