@@ -1,6 +1,6 @@
 "use client";
 
-import type { BarWithTaps } from "@/lib/bars";
+import type { BarWithTaps } from "@/actions/bar";
 import { Map, Marker } from "@vis.gl/react-google-maps";
 
 type BarMapProps = {
@@ -40,8 +40,6 @@ export function BarMap({
           onMouseOut={() => onMarkerHover(null)}
           onClick={() => {
             onMarkerClick?.(bar.id);
-            console.log("Map marker clicked:", bar.name);
-            console.log("Bar taps:", bar.taps);
           }}
         />
       ))}

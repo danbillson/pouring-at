@@ -5,7 +5,6 @@ import { BarImageUpload } from "@/components/dashboard/bar/bar-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Bar } from "@/db/schema";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
@@ -14,16 +13,7 @@ type BarDetailsProps = {
   bar: Bar;
 };
 
-export function BarDetails({ bar: initialBar }: BarDetailsProps) {
-  const {
-    data: { bar },
-  } = useQuery({
-    queryKey: ["bars", initialBar.id],
-    queryFn: () =>
-      fetch(`/api/bars/${initialBar.id}`).then((res) => res.json()),
-    initialData: { bar: initialBar },
-  });
-
+export function BarDetails({ bar }: BarDetailsProps) {
   return (
     <div className="grid gap-8">
       <div>
@@ -44,7 +34,7 @@ export function BarDetails({ bar: initialBar }: BarDetailsProps) {
           <BarImageUpload
             barId={bar.id}
             type="cover"
-            className="top-[unset] -right-2 -bottom-2 size-12"
+            className="top-[unset] right-2 bottom-2 size-12"
           />
         </div>
       </div>

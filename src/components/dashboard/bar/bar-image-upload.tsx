@@ -1,11 +1,12 @@
 "use client";
 
+import { updateBarImageAction } from "@/actions/bar";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 type BarImageUploadProps = {
   barId: string;
@@ -19,7 +20,7 @@ export function BarImageUpload({
   className,
 }: BarImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
 
   return (
     <>
@@ -32,38 +33,45 @@ export function BarImageUpload({
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
+            setIsUploading(true);
             const path = `bars/${barId}/${type}.${extension}`;
-            const { data, error } = await uploadImage({
-              bucket: type === "logo" ? "logos" : "covers",
-              file,
-              path,
-            });
+            try {
+              const { data: uploadData, error: uploadError } =
+                await uploadImage({
+                  bucket: type === "logo" ? "logos" : "covers",
+                  file,
+                  path,
+                });
 
-            if (error) {
-              console.error(error);
-              return;
+              if (uploadError || !uploadData) {
+                throw new Error(
+                  uploadError?.message || "Failed to upload image"
+                );
+              }
+
+              const result = await updateBarImageAction({
+                barId,
+                type,
+                path: uploadData.fullPath,
+              });
+
+              if (!result.success) {
+                throw new Error(result.error || `Failed to update bar ${type}`);
+              }
+
+              toast.success(
+                `${type === "logo" ? "Logo" : "Cover image"} updated successfully.`
+              );
+            } catch (error) {
+              console.error(`Failed to update bar ${type}:`, error);
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : `Failed to update ${type}`
+              );
+            } finally {
+              setIsUploading(false);
             }
-
-            const body =
-              type === "logo"
-                ? { logo: data.fullPath }
-                : { coverImage: data.fullPath };
-
-            const response = await fetch(`/api/bars/${barId}`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-              console.error("Failed to update bar");
-              return;
-            }
-
-            // Invalidate the bar query to trigger a refetch
-            queryClient.invalidateQueries({ queryKey: ["bars", barId] });
           }
         }}
       />
@@ -74,6 +82,7 @@ export function BarImageUpload({
           className
         )}
         onClick={() => inputRef.current?.click()}
+        disabled={isUploading}
       >
         <Pencil className="size-4" />
       </Button>
