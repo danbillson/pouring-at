@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 interface BrewerySearchProps {
   value?: string;
   name?: string;
-  onChange: (value: string) => void;
+  onChange: (value: string | null) => void;
 }
 
 async function searchBreweries(search: string) {
@@ -104,13 +104,13 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
         <Command shouldFilter={false}>
+          <CommandEmpty>No breweries found.</CommandEmpty>
           <CommandInput
             placeholder="Search breweries..."
             onValueChange={(value) => {
               setSearchDebouncer.maybeExecute(value);
             }}
           />
-          <CommandEmpty>No breweries found.</CommandEmpty>
           <CommandList>
             {breweries.map((brewery) => (
               <CommandItem

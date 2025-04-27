@@ -1,6 +1,7 @@
 "use client";
 
 import { updateBeerAction } from "@/actions/beer";
+import { BeerStyleSelect } from "@/components/forms/beer-style-select";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,18 +13,8 @@ import {
 } from "@/components/ui/form";
 import { ImageUploadInput } from "@/components/ui/image-upload-input";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Beer } from "@/db/schema";
-import { beerStyles } from "@/lib/constants/beer-style";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -153,27 +144,14 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
           control={form.control}
           name="style"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex flex-col">
               <FormLabel>Style</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a style" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.entries(beerStyles).map(([category, styles]) => (
-                    <SelectGroup key={category}>
-                      <SelectLabel>{category.split("_").join(" ")}</SelectLabel>
-                      {styles.map((style) => (
-                        <SelectItem key={style} value={style}>
-                          {style}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <BeerStyleSelect
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
