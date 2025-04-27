@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Brewery } from "@/db/schema";
 import { uploadImage } from "@/lib/storage/image-upload";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useRef } from "react";

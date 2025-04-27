@@ -1,7 +1,7 @@
 import { getBar } from "@/actions/bar";
 import { BarLogo } from "@/components/bars/bar-logo";
 import { TapList } from "@/components/tap-list";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 
 export default async function BarPage({

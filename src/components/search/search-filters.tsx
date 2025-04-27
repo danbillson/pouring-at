@@ -1,16 +1,7 @@
 "use client";
 
+import { BeerStyleSelect } from "@/components/forms/beer-style-select";
 import { BrewerySelect } from "@/components/search/brewery-select";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { beerStyles } from "@/lib/constants/beer-style";
 import { searchFiltersParsers } from "@/lib/search-params";
 import { SlidersHorizontal } from "lucide-react";
 import { useQueryStates } from "nuqs";
@@ -32,28 +23,12 @@ export function SearchFilters() {
         <SlidersHorizontal className="xs:block hidden h-4 w-4" />
         <BrewerySelect
           value={filters.brewery || ""}
-          onChange={(value) => setFilters({ brewery: value })}
+          onChange={(value) => setFilters({ brewery: value || null })}
         />
-        <Select
-          onValueChange={(value) => setFilters({ style: value })}
-          value={filters.style || ""}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Beer style" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(beerStyles).map(([category, styles]) => (
-              <SelectGroup key={category}>
-                <SelectLabel>{category.split("_").join(" ")}</SelectLabel>
-                {styles.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
+        <BeerStyleSelect
+          value={filters.style}
+          onChange={(value) => setFilters({ style: value || null })}
+        />
       </div>
     </div>
   );
