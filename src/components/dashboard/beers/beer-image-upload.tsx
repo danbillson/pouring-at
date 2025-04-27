@@ -33,8 +33,7 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
             return;
           }
 
-          const path = `beers/${beerId}/logo.${extension}`;
-          // Perform the upload
+          const path = `beers/${beerId}/logo-${Date.now()}.${extension}`;
           const { data: uploadData, error: uploadError } = await uploadImage({
             bucket: "logos",
             file,
@@ -47,7 +46,6 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
             return;
           }
 
-          // Update the beer record using the Server Action
           const updateResult = await updateBeerAction(beerId, {
             image: uploadData.fullPath,
           });
@@ -62,7 +60,6 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
             );
           } else {
             toast.success("Beer image updated.");
-            // Revalidation is handled by the Server Action
           }
         }}
       />

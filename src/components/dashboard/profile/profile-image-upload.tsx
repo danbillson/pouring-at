@@ -24,7 +24,7 @@ export function ProfileImageUpload({ userId }: ProfileImageUploadProps) {
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
-            const path = `users/${userId}/avatar.${extension}`;
+            const path = `users/${userId}/avatar-${Date.now()}.${extension}`;
             const { data, error } = await uploadImage({
               bucket: "avatars",
               file,

@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ImageUploadInput } from "@/components/ui/image-upload-input";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,8 +25,6 @@ import { Separator } from "@/components/ui/separator";
 import { beerStyles } from "@/lib/constants/beer-style";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil } from "lucide-react";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useForm } from "react-hook-form";
@@ -56,9 +55,7 @@ function SubmitButton() {
 }
 
 export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [selectedImage, setSelectedImage] = useState<File>();
-  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const form = useForm<AddBeerValues>({
     resolver: zodResolver(addBeerSchema),
     defaultValues: {
@@ -69,9 +66,6 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
     },
   });
 
-  // Use a ref for the form to reset it later if needed
-  const formRef = useRef<HTMLFormElement>(null);
-
   async function handleSubmitAction() {
     const values = form.getValues();
 
@@ -79,7 +73,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
       const result = await createBeerAction({
         name: values.name,
         style: values.style,
-        abv: parseFloat(values.abv || "0"),
+        abv: values.abv ? parseFloat(values.abv) : undefined,
         description: values.description,
         brewery: {
           id: breweryId,
@@ -92,13 +86,14 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
       }
 
       toast.success("Beer created successfully");
+      const newBeerId = result.data.id;
 
       if (selectedImage) {
         const extension = selectedImage.type.split("/")[1];
         if (!extension) {
           toast.error("Invalid image file type.");
         } else {
-          const path = `beers/${result.data.id}/logo.${extension}`;
+          const path = `beers/${newBeerId}/logo-${Date.now()}.${extension}`;
           const { data: uploadData, error: uploadError } = await uploadImage({
             bucket: "logos",
             file: selectedImage,
@@ -109,11 +104,9 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
             console.error("Image upload failed:", uploadError);
             toast.warning("Beer created, but image upload failed.");
           } else if (uploadData?.fullPath) {
-            // Update the beer record with the image path
-            const updateResult = await updateBeerAction(result.data.id, {
+            const updateResult = await updateBeerAction(newBeerId, {
               image: uploadData.fullPath,
             });
-
             if (!updateResult.success) {
               toast.error(
                 updateResult.error || "Failed to save image path to beer."
@@ -130,8 +123,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
       }
 
       form.reset();
-      setSelectedImage(undefined);
-      setPreviewUrl(undefined);
+      setSelectedImage(null);
 
       onSuccess?.();
     } catch (error) {
@@ -144,44 +136,11 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
 
   return (
     <Form {...form}>
-      <form ref={formRef} action={handleSubmitAction} className="space-y-4">
-        <div className="bg-muted relative aspect-square w-full rounded-lg">
-          <input
-            type="file"
-            ref={inputRef}
-            className="hidden"
-            accept="image/png, image/jpeg, image/webp"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setSelectedImage(file);
-                setPreviewUrl(URL.createObjectURL(file));
-              }
-            }}
-          />
-          {previewUrl ? (
-            <Image
-              src={previewUrl}
-              alt="Preview"
-              fill
-              className="rounded-lg object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-muted-foreground text-sm">
-                Click to add an image
-              </p>
-            </div>
-          )}
-          <Button
-            type="button"
-            variant="outline"
-            className="absolute right-2 bottom-2 size-8 rounded-full border-0"
-            onClick={() => inputRef.current?.click()}
-          >
-            <Pencil className="size-4" />
-          </Button>
-        </div>
+      <form action={handleSubmitAction} className="space-y-4">
+        <ImageUploadInput
+          altText="Beer image preview"
+          onFileSelect={setSelectedImage}
+        />
 
         <Separator className="my-8" />
 

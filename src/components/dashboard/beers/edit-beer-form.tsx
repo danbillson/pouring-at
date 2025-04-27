@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { ImageUploadInput } from "@/components/ui/image-upload-input";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -23,12 +24,12 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Beer } from "@/db/schema";
 import { beerStyles } from "@/lib/constants/beer-style";
+import { uploadImage } from "@/lib/storage/image-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { BeerImageUpload } from "./beer-image-upload";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
 
@@ -47,6 +48,8 @@ interface EditBeerFormProps {
 }
 
 export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
   const form = useForm<EditBeerValues>({
     resolver: zodResolver(editBeerSchema),
     defaultValues: {
@@ -61,20 +64,58 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
 
   async function onSubmit(data: EditBeerValues) {
     try {
-      const result = await updateBeerAction(beer.id, {
+      const textUpdateResult = await updateBeerAction(beer.id, {
         name: data.name,
         style: data.style,
-        abv: parseFloat(data.abv || "0")),
+        abv: data.abv ? parseFloat(data.abv) : undefined,
         description: data.description,
       });
 
-      if (!result.success) {
-        toast.error(result.error || "Failed to update beer");
+      if (!textUpdateResult.success) {
+        toast.error(textUpdateResult.error || "Failed to update beer details");
         return;
       }
 
-      toast.success("Beer updated successfully");
-      onSuccess?.(); // Close drawer/modal
+      toast.success("Beer details updated successfully");
+
+      if (selectedImage) {
+        const extension = selectedImage.type.split("/")[1];
+        if (!extension) {
+          toast.error("Invalid image file type.");
+        } else {
+          const path = `beers/${beer.id}/logo-${Date.now()}.${extension}`;
+          const { data: uploadData, error: uploadError } = await uploadImage({
+            bucket: "logos",
+            file: selectedImage,
+            path,
+          });
+
+          if (uploadError) {
+            console.error("Image upload failed:", uploadError);
+            toast.warning("Beer details saved, but image upload failed.");
+          } else if (uploadData?.fullPath) {
+            const imageUpdateResult = await updateBeerAction(beer.id, {
+              image: uploadData.fullPath,
+            });
+
+            if (!imageUpdateResult.success) {
+              toast.error(
+                imageUpdateResult.error ||
+                  "Failed to save new image path to beer."
+              );
+              console.error(
+                "Failed to update beer with image path:",
+                imageUpdateResult.error
+              );
+            } else {
+              toast.success("Beer image updated successfully.");
+            }
+          }
+        }
+      }
+
+      setSelectedImage(null);
+      onSuccess?.();
     } catch (error) {
       console.error("Failed to update beer:", error);
       toast.error(
@@ -86,24 +127,11 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="relative">
-          <div className="bg-muted relative aspect-square w-full rounded-lg">
-            {beer.image ? (
-              <Image
-                key={beer.image}
-                src={`${storageUrl}/${beer.image}`}
-                alt={beer.name}
-                className="rounded-lg object-cover"
-                fill
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <p className="text-muted-foreground text-sm">No image</p>
-              </div>
-            )}
-            <BeerImageUpload beerId={beer.id} />
-          </div>
-        </div>
+        <ImageUploadInput
+          altText={beer.name}
+          initialImageUrl={beer.image ? `${storageUrl}/${beer.image}` : null}
+          onFileSelect={setSelectedImage}
+        />
 
         <Separator className="my-8" />
 
