@@ -1,5 +1,6 @@
 "use client";
 
+import { AddBeerForm } from "@/components/dashboard/beers/add-beer-form";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/drawer";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { AddBeerForm } from "./add-beer-form";
 
 interface AddBeerDrawerProps {
   breweryId: string;

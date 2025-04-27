@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteBeerAction } from "@/actions/beer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Beer } from "@/db/schema";
-import { useQueryClient } from "@tanstack/react-query";
+import { useTransition } from "react";
 import { toast } from "sonner";
 
 interface DeleteBeerDialogProps {
@@ -25,27 +26,19 @@ export function DeleteBeerDialog({
   open,
   onOpenChange,
 }: DeleteBeerDialogProps) {
-  const queryClient = useQueryClient();
+  const [isPending, startTransition] = useTransition();
 
   async function onDelete() {
-    try {
-      const response = await fetch(`/api/beers/${beer.id}`, {
-        method: "DELETE",
-      });
+    startTransition(async () => {
+      const result = await deleteBeerAction(beer.id);
 
-      if (!response.ok) {
-        throw new Error("Failed to delete beer");
+      if (result.success) {
+        toast.success("Beer deleted successfully");
+        onOpenChange(false);
+      } else {
+        toast.error(result.error || "Failed to delete beer");
       }
-
-      await queryClient.invalidateQueries({ queryKey: ["beers"] });
-      toast.success("Beer deleted successfully");
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Failed to delete beer:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete beer"
-      );
-    }
+    });
   }
 
   return (
@@ -59,8 +52,10 @@ export function DeleteBeerDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onDelete} disabled={isPending}>
+            {isPending ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

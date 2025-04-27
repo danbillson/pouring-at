@@ -1,5 +1,6 @@
 "use client";
 
+import { createBeerAction } from "@/actions/beer";
 import { BrewerySearch } from "@/components/search/brewery-search";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createBeer } from "@/lib/beers";
-import { createBrewery } from "@/lib/breweries";
 import { beerStyles } from "@/lib/constants/beer-style";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -29,18 +28,17 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const createBeerSchema = z.object({
+const addBeerSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  brewery: z.object({
-    id: z.string().optional(),
-    name: z.string().min(1, "Brewery is required"),
-  }),
   style: z.string().min(1, "Style is required"),
   abv: z.string().optional(),
-  description: z.string().optional(),
+  brewery: z.object({
+    id: z.string().optional(),
+    name: z.string().min(1, "Brewery name is required").optional(),
+  }),
 });
 
-type CreateBeerValues = z.infer<typeof createBeerSchema>;
+type AddBeerValues = z.infer<typeof addBeerSchema>;
 
 interface CreateBeerFormProps {
   onSuccess?: (beerId: string) => void;
@@ -49,8 +47,8 @@ interface CreateBeerFormProps {
 
 export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
   const [newBrewery, setNewBrewery] = useState(false);
-  const form = useForm<CreateBeerValues>({
-    resolver: zodResolver(createBeerSchema),
+  const form = useForm<AddBeerValues>({
+    resolver: zodResolver(addBeerSchema),
     defaultValues: {
       name: "",
       brewery: {
@@ -58,39 +56,23 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
       },
       style: "",
       abv: "",
-      description: "",
     },
   });
 
-  async function onSubmit(data: CreateBeerValues) {
+  async function onSubmit(data: AddBeerValues) {
     try {
-      let breweryId = data.brewery.id;
-
-      if (!breweryId) {
-        const result = await createBrewery({ name: data.brewery.name });
-
-        if (!result.success || !result.data) {
-          throw new Error(result.error || "Failed to create brewery");
-        }
-
-        breweryId = result.data.id;
-      }
-
-      const result = await createBeer({
-        name: data.name,
-        style: data.style,
+      const result = await createBeerAction({
+        ...data,
         abv: parseFloat(data.abv || "0"),
-        description: data.description,
-        breweryId,
       });
 
-      if (!result.success || !result.beer) {
-        toast.error(result.error);
-        return;
+      if (!result.success || !result.data) {
+        throw new Error(result.error || "Failed to create beer");
       }
 
-      toast.success(`Created ${data.name} by ${data.brewery.name}`);
-      onSuccess?.(result.beer.id);
+      toast.success(`Created ${result.data.name}`);
+      onSuccess?.(result.data.id);
+      form.reset();
     } catch (error) {
       console.error("Failed to create beer:", error);
       toast.error(
@@ -200,14 +182,9 @@ export function CreateBeerForm({ onSuccess, onBack }: CreateBeerFormProps) {
           name="abv"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ABV</FormLabel>
+              <FormLabel>ABV (%)</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="Enter ABV"
-                  {...field}
-                />
+                <Input type="number" step="0.1" placeholder="6.0" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

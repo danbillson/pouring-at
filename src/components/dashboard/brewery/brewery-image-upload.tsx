@@ -33,7 +33,7 @@ export function BreweryImageUpload({
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
-            const path = `breweries/${brewery.id}/${type}.${extension}`;
+            const path = `breweries/${brewery.id}/${type}-${Date.now()}.${extension}`;
             const { data, error } = await uploadImage({
               bucket: type === "logo" ? "logos" : "covers",
               file,
