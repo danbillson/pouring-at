@@ -204,7 +204,6 @@ export async function updateBarAction(id: string, data: UpdateBarData) {
       currentBar.postcode !== validatedData.postcode;
 
     if (addressChanged) {
-      console.log("Address changed, re-geocoding...");
       const geocodeResult = await geocodeAddress({
         addressLine1: validatedData.addressLine1,
         addressLine2: validatedData.addressLine2,

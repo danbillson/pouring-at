@@ -28,7 +28,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         style: style,
         brewery: brewery,
       });
-      console.log("bars", bars);
     } catch (error) {
       console.error("Search page error:", error);
       initialError =

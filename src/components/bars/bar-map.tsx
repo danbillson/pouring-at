@@ -40,8 +40,6 @@ export function BarMap({
           onMouseOut={() => onMarkerHover(null)}
           onClick={() => {
             onMarkerClick?.(bar.id);
-            console.log("Map marker clicked:", bar.name);
-            console.log("Bar taps:", bar.taps);
           }}
         />
       ))}
