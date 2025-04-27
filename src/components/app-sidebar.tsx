@@ -1,5 +1,6 @@
 "use client";
 
+import { useDashboard } from "@/components/dashboard/dashboard-provider";
 import { VenueSearch } from "@/components/search/venue-search";
 import {
   Sidebar,
@@ -15,7 +16,6 @@ import {
 import { VenueType } from "@/db/schema";
 import { Beer, Hop, LayoutPanelLeft, Store, User } from "lucide-react";
 import Link from "next/link";
-import { useDashboard } from "./dashboard/dashboard-provider";
 
 // Menu items.
 const sharedItems = [

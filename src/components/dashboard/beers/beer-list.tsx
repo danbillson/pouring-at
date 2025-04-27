@@ -1,5 +1,9 @@
 "use client";
 
+import { AddBeerDrawer } from "@/components/dashboard/beers/add-beer-drawer";
+import { BeerDetail } from "@/components/dashboard/beers/beer-detail";
+import { DeleteBeerDialog } from "@/components/dashboard/beers/delete-beer-dialog";
+import { EditBeerDrawer } from "@/components/dashboard/beers/edit-beer-drawer";
 import {
   Card,
   CardContent,
@@ -18,10 +22,6 @@ import { Beer, Brewery } from "@/db/schema";
 import { MoreVertical, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { AddBeerDrawer } from "./add-beer-drawer";
-import { BeerDetail } from "./beer-detail";
-import { DeleteBeerDialog } from "./delete-beer-dialog";
-import { EditBeerDrawer } from "./edit-beer-drawer";
 
 interface BeerListProps {
   beers: Beer[];

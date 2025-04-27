@@ -1,5 +1,6 @@
 "use client";
 
+import { EditBeerForm } from "@/components/dashboard/beers/edit-beer-form";
 import {
   Drawer,
   DrawerContent,
@@ -7,7 +8,6 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Beer } from "@/db/schema";
-import { EditBeerForm } from "./edit-beer-form";
 
 interface EditBeerDrawerProps {
   beer: Beer;
