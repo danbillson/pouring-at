@@ -64,7 +64,7 @@ export function EditBeerForm({ beer, onSuccess }: EditBeerFormProps) {
       const result = await updateBeerAction(beer.id, {
         name: data.name,
         style: data.style,
-        abv: String(parseFloat(data.abv || "0")),
+        abv: parseFloat(data.abv || "0")),
         description: data.description,
       });
 

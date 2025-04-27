@@ -1,4 +1,4 @@
-import { getBeer } from "@/lib/beers";
+import { getBeerAction } from "@/actions/beer";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -8,11 +8,14 @@ export default async function BeerPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const beerData = await getBeer(id);
 
-  if (!beerData) {
+  const result = await getBeerAction(id);
+
+  if (!result.success || !result.data) {
     notFound();
   }
+
+  const beerData = result.data;
 
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center p-6 md:p-10">

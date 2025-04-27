@@ -81,10 +81,12 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
         style: values.style,
         abv: parseFloat(values.abv || "0"),
         description: values.description,
-        breweryId,
+        brewery: {
+          id: breweryId,
+        },
       });
 
-      if (!result.success || !result.beer) {
+      if (!result.success || !result.data) {
         toast.error(result.error || "Failed to create beer");
         return;
       }
@@ -96,7 +98,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
         if (!extension) {
           toast.error("Invalid image file type.");
         } else {
-          const path = `beers/${result.beer.id}/logo.${extension}`;
+          const path = `beers/${result.data.id}/logo.${extension}`;
           const { data: uploadData, error: uploadError } = await uploadImage({
             bucket: "logos",
             file: selectedImage,
@@ -108,7 +110,7 @@ export function AddBeerForm({ breweryId, onSuccess }: AddBeerFormProps) {
             toast.warning("Beer created, but image upload failed.");
           } else if (uploadData?.fullPath) {
             // Update the beer record with the image path
-            const updateResult = await updateBeerAction(result.beer.id, {
+            const updateResult = await updateBeerAction(result.data.id, {
               image: uploadData.fullPath,
             });
 

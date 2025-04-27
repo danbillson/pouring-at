@@ -1,5 +1,6 @@
 "use client";
 
+import { getBeerAction, searchBeersAction } from "@/actions/beer";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -12,11 +13,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Beer } from "@/lib/beers";
+import type { Beer } from "@/db/schema";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type SearchedBeer = {
+  id: string;
+  name: string;
+  brewery?: {
+    id: string;
+    name: string;
+    slug: string | null;
+  } | null;
+};
 
 interface BeerSearchProps {
   value?: string;
@@ -24,46 +35,65 @@ interface BeerSearchProps {
   onCreateNew?: () => void;
 }
 
-async function searchBeers(search: string) {
-  if (!search) return [];
-  const response = await fetch(
-    `/api/beers/search?q=${encodeURIComponent(search)}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch beers");
-  }
-  const data = await response.json();
-  return data.beers as Beer[];
-}
-
-async function getBeer(id: string) {
-  const response = await fetch(`/api/beers/${id}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch beer");
-  }
-  const data = await response.json();
-  return data.beer as Beer;
-}
-
 export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
   const [open, setOpen] = useState(false);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchedBeer[]>([]);
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const [selectedBeerName, setSelectedBeerName] = useState<string | null>(null);
+  const [isLoadingSelected, setIsLoadingSelected] = useState(false);
 
-  const { data: beers = [] } = useQuery({
-    queryKey: ["beers", debouncedSearch],
-    queryFn: () => searchBeers(debouncedSearch),
-    enabled: debouncedSearch.length > 0,
-  });
+  useEffect(() => {
+    if (value) {
+      setIsLoadingSelected(true);
+      setSelectedBeerName("Loading...");
+      getBeerAction(value)
+        .then((result) => {
+          if (result.success && result.data) {
+            setSelectedBeerName(result.data.name);
+          } else {
+            setSelectedBeerName("Error loading");
+            console.error(result.error || "Failed to fetch selected beer");
+          }
+        })
+        .catch((err) => {
+          setSelectedBeerName("Error loading");
+          console.error("Error in getBeerAction:", err);
+        })
+        .finally(() => {
+          setIsLoadingSelected(false);
+        });
+    } else {
+      setSelectedBeerName(null);
+    }
+  }, [value]);
 
-  const { data: selectedBeer } = useQuery({
-    queryKey: ["beer", value],
-    queryFn: () => getBeer(value!),
-    enabled: !!value,
-  });
-
-  const setSearchDebouncer = useAsyncDebouncer(
-    (value: string) => {
-      setDebouncedSearch(value);
+  const performSearch = useAsyncDebouncer(
+    async (query: string) => {
+      if (!query) {
+        setSearchResults([]);
+        setIsLoadingSearch(false);
+        return;
+      }
+      setIsLoadingSearch(true);
+      try {
+        const result = await searchBeersAction(query);
+        if (result.success && result.data) {
+          setSearchResults(result.data as SearchedBeer[]);
+        } else {
+          setSearchResults([]);
+          console.error(result.error || "Failed to search beers");
+          toast.error(result.error || "Beer search failed");
+        }
+      } catch (error) {
+        setSearchResults([]);
+        console.error("Error in searchBeersAction:", error);
+        toast.error(
+          error instanceof Error ? error.message : "Beer search failed"
+        );
+      } finally {
+        setIsLoadingSearch(false);
+      }
     },
     {
       wait: 300,
@@ -72,10 +102,15 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
 
   useEffect(() => {
     return () => {
-      setSearchDebouncer.cancel();
+      performSearch.cancel();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [performSearch]);
+
+  const displayValue = value
+    ? (selectedBeerName ??
+      searchResults.find((beer) => beer.id === value)?.name ??
+      (isLoadingSelected ? "Loading..." : "Select beer..."))
+    : "Select beer...";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -85,50 +120,61 @@ export function BeerSearch({ value, onChange, onCreateNew }: BeerSearchProps) {
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={isLoadingSelected}
         >
-          {value
-            ? (selectedBeer?.name ??
-              beers.find((beer) => beer.id === value)?.name ??
-              "Loading...")
-            : "Select beer..."}
+          {displayValue}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search beers..."
             onValueChange={(value) => {
-              setSearchDebouncer.maybeExecute(value);
+              setSearchQuery(value);
+              performSearch.maybeExecute(value);
             }}
+            value={searchQuery}
+            disabled={isLoadingSearch}
           />
           <CommandList>
-            {beers.map((beer) => (
+            {isLoadingSearch && (
+              <CommandItem disabled>Searching...</CommandItem>
+            )}
+            {!isLoadingSearch && searchResults.length === 0 && searchQuery && (
+              <CommandItem disabled>No beers found.</CommandItem>
+            )}
+            {!isLoadingSearch &&
+              searchResults.map((beer) => (
+                <CommandItem
+                  key={beer.id}
+                  value={beer.id}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue);
+                    setSelectedBeerName(beer.name);
+                    setOpen(false);
+                  }}
+                >
+                  {beer.brewery?.name && (
+                    <span className="text-muted-foreground mr-2">
+                      {beer.brewery.name}
+                    </span>
+                  )}
+                  {beer.name}
+                </CommandItem>
+              ))}
+            {onCreateNew && (
               <CommandItem
-                key={beer.id}
-                value={beer.id}
-                onSelect={(currentValue) => {
-                  onChange(currentValue === value ? "" : currentValue);
+                onSelect={() => {
+                  onCreateNew?.();
                   setOpen(false);
                 }}
+                className="text-muted-foreground mt-1 cursor-pointer border-t pt-1"
               >
-                {beer.brewery?.name && (
-                  <span className="text-muted-foreground">
-                    {beer.brewery.name}
-                  </span>
-                )}
-                {beer.name}
+                <Plus className="mr-2 h-4 w-4" />
+                Add a new beer...
               </CommandItem>
-            ))}
-            <CommandItem
-              onSelect={() => {
-                onCreateNew?.();
-                setOpen(false);
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Add a new beer
-            </CommandItem>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
