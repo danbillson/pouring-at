@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;

@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { Brewery } from "@/lib/breweries";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";

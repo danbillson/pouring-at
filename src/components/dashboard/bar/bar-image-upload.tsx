@@ -3,7 +3,7 @@
 import { updateBarImageAction } from "@/actions/bar";
 import { Button } from "@/components/ui/button";
 import { uploadImage } from "@/lib/storage/image-upload";
-import { cn } from "@/lib/utils/utils";
+import { cn } from "@/lib/utils";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
