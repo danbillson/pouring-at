@@ -96,7 +96,6 @@ export async function createBeerAction(data: CreateBeerValues) {
         );
       }
       breweryId = breweryResult.data.id;
-      console.log("New brewery created with ID:", breweryId);
     }
 
     // Ensure breweryId is a string before using in the query
