@@ -2,8 +2,14 @@
 
 import { db } from "@/db";
 import { bar, beer, brewery, tap } from "@/db/schema";
+import { hasAccessToBar } from "@/lib/auth/access";
 import { geocodeAddress } from "@/lib/maps/geocoding";
-import { createBarSchema, type CreateBarValues } from "@/lib/schemas/bar";
+import {
+  createBarSchema,
+  updateBarSchema,
+  type CreateBarValues,
+  type UpdateBarValues,
+} from "@/lib/schemas/bar";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -123,20 +129,12 @@ export async function searchBars({
 // --- Mutation Actions ---
 
 export async function createBarAction(data: CreateBarValues) {
-  // 1. Validate input on the server using the shared schema
   const validationResult = createBarSchema.safeParse(data);
   if (!validationResult.success) {
-    // Extract specific Zod errors if needed, or return a generic message
-    // console.error("Validation failed:", validationResult.error.flatten());
     return { success: false, error: "Invalid form data submitted." };
   }
 
-  // Use validatedData from now on
   const validatedData = validationResult.data;
-
-  // TODO: Add Authentication/Authorization if needed
-  // const session = await auth.api.getSession(...);
-  // if (!session?.user) { return { success: false, error: "Unauthorized" }; }
 
   try {
     const { lat, lng } = await geocodeAddress({
@@ -150,16 +148,10 @@ export async function createBarAction(data: CreateBarValues) {
       return { success: false, error: "Failed to find address" };
     }
 
-    // TODO: Add slug generation if needed, check for uniqueness
-    // const slug = createSlug(data.name);
-    // const existing = await db.query.bar.findFirst({ where: eq(bar.slug, slug) });
-    // if (existing) { return { success: false, error: "Bar name already taken" }; }
-
     const [barData] = await db
       .insert(bar)
       .values({
         name: validatedData.name,
-        // slug: slug,
         addressLine1: validatedData.addressLine1,
         addressLine2: validatedData.addressLine2 || null,
         city: validatedData.city,
@@ -167,19 +159,12 @@ export async function createBarAction(data: CreateBarValues) {
         location: sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`,
         formattedAddress: `${validatedData.addressLine1}${validatedData.addressLine2 ? `, ${validatedData.addressLine2}` : ""}, ${validatedData.city}, ${validatedData.postcode}`,
         // createdById: session.user.id, // Add if tracking creator
-        // organizationId: session.user.organizationId, // If applicable
       })
       .returning();
 
     if (!barData) {
       throw new Error("Database failed to return created bar.");
     }
-
-    // Revalidate relevant paths
-    revalidatePath("/bars"); // Example path for a public list
-    revalidatePath("/search"); // Revalidate search page
-    // Revalidate specific bar page?
-    // revalidatePath(`/bars/${barData.slug}`);
 
     return { success: true, data: barData };
   } catch (error) {
@@ -191,5 +176,130 @@ export async function createBarAction(data: CreateBarValues) {
   }
 }
 
-// TODO: Add updateBarAction
+type UpdateBarData = Omit<UpdateBarValues, "slug" | "logo" | "coverImage">;
+
+export async function updateBarAction(id: string, data: UpdateBarData) {
+  await hasAccessToBar();
+
+  const validationResult = updateBarSchema.safeParse(data);
+  if (!validationResult.success) {
+    return { success: false, error: "Invalid form data submitted." };
+  }
+  const validatedData = validationResult.data;
+
+  try {
+    const currentBar = await db.query.bar.findFirst({ where: eq(bar.id, id) });
+    if (!currentBar) {
+      return { success: false, error: "Bar not found." };
+    }
+
+    let lat = currentBar.location?.y;
+    let lng = currentBar.location?.x;
+    let formattedAddress = currentBar.formattedAddress;
+
+    const addressChanged =
+      currentBar.addressLine1 !== validatedData.addressLine1 ||
+      currentBar.addressLine2 !== (validatedData.addressLine2 || null) ||
+      currentBar.city !== validatedData.city ||
+      currentBar.postcode !== validatedData.postcode;
+
+    if (addressChanged) {
+      console.log("Address changed, re-geocoding...");
+      const geocodeResult = await geocodeAddress({
+        addressLine1: validatedData.addressLine1,
+        addressLine2: validatedData.addressLine2,
+        city: validatedData.city,
+        postcode: validatedData.postcode,
+      });
+      if (!geocodeResult.lat || !geocodeResult.lng) {
+        console.warn("Failed to re-geocode address for bar:", id);
+
+        return { success: false, error: "Failed to find new address." };
+      } else {
+        lat = geocodeResult.lat;
+        lng = geocodeResult.lng;
+        formattedAddress = `${validatedData.addressLine1}${validatedData.addressLine2 ? `, ${validatedData.addressLine2}` : ""}, ${validatedData.city}, ${validatedData.postcode}`;
+      }
+    }
+
+    const [updatedBar] = await db
+      .update(bar)
+      .set({
+        name: validatedData.name,
+        addressLine1: validatedData.addressLine1,
+        addressLine2: validatedData.addressLine2 || null,
+        city: validatedData.city,
+        postcode: validatedData.postcode,
+        location: sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)`,
+        formattedAddress: formattedAddress,
+        updatedAt: new Date(),
+      })
+      .where(eq(bar.id, id))
+      .returning();
+
+    if (!updatedBar) {
+      throw new Error("Database failed to return updated bar.");
+    }
+
+    // Revalidate paths
+    revalidatePath(`/dashboard/bar`); // Revalidate the general dashboard area
+    revalidatePath(`/bars/${updatedBar.id}`); // Revalidate specific bar page if it exists
+
+    return { success: true, data: updatedBar };
+  } catch (error) {
+    console.error("Failed to update bar:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update bar",
+    };
+  }
+}
+
+// --- Update Bar Image Action ---
+type UpdateBarImageInput = {
+  barId: string;
+  type: "logo" | "cover";
+  path: string;
+};
+
+export async function updateBarImageAction({
+  barId,
+  type,
+  path,
+}: UpdateBarImageInput) {
+  await hasAccessToBar();
+
+  try {
+    const fieldToUpdate =
+      type === "logo" ? { logo: path } : { coverImage: path };
+
+    const [updatedBar] = await db
+      .update(bar)
+      .set({
+        ...fieldToUpdate,
+        updatedAt: new Date(),
+      })
+      .where(eq(bar.id, barId))
+      .returning({ id: bar.id, slug: bar.slug });
+
+    if (!updatedBar) {
+      throw new Error(
+        "Database failed to return updated bar after image update."
+      );
+    }
+
+    revalidatePath(`/dashboard/bar`);
+    revalidatePath(`/bars/${updatedBar.id}`);
+
+    return { success: true, data: updatedBar };
+  } catch (error) {
+    console.error(`Failed to update bar ${type}:`, error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : `Failed to update bar ${type}`,
+    };
+  }
+}
+
 // TODO: Add deleteBarAction

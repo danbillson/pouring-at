@@ -1,5 +1,6 @@
 "use client";
 
+import { updateBarAction } from "@/actions/bar";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,40 +12,23 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Bar } from "@/db/schema";
+import { updateBarSchema, type UpdateBarValues } from "@/lib/schemas/bar";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 
-const updateBarSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug: z.string().min(1, "Slug is required"),
-  addressLine1: z.string().min(1, "Address is required"),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  postcode: z
-    .string()
-    .min(1, "Postcode is required")
-    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
-      message: "Invalid UK postcode format",
-    }),
-});
-
-type UpdateBarValues = z.infer<typeof updateBarSchema>;
+type BarDetailsFormData = Omit<UpdateBarValues, "slug" | "logo" | "coverImage">;
 
 type BarDetailsFormProps = {
   bar: Bar;
 };
 
 export function BarDetailsForm({ bar }: BarDetailsFormProps) {
-  const queryClient = useQueryClient();
-  const form = useForm<UpdateBarValues>({
+  const form = useForm<BarDetailsFormData>({
     resolver: zodResolver(updateBarSchema),
     defaultValues: {
       name: bar.name,
-      slug: bar.slug ?? "",
       addressLine1: bar.addressLine1 ?? "",
       addressLine2: bar.addressLine2 ?? "",
       city: bar.city ?? "",
@@ -55,7 +39,6 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
   useEffect(() => {
     form.reset({
       name: bar.name,
-      slug: bar.slug ?? "",
       addressLine1: bar.addressLine1 ?? "",
       addressLine2: bar.addressLine2 ?? "",
       city: bar.city ?? "",
@@ -63,21 +46,14 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
     });
   }, [bar, form]);
 
-  async function onSubmit(data: UpdateBarValues) {
+  async function onSubmit(data: BarDetailsFormData) {
     try {
-      const response = await fetch(`/api/bars/${bar.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await updateBarAction(bar.id, data);
 
-      if (!response.ok) {
-        throw new Error("Failed to update bar");
+      if (!result.success) {
+        throw new Error(result.error || "Failed to update bar");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["bars", bar.id] });
       toast.success("Bar details updated successfully");
     } catch (error) {
       console.error("Failed to update bar:", error);
@@ -98,19 +74,6 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
               <FormLabel>Bar Name</FormLabel>
               <FormControl>
                 <Input placeholder="Mikkeller Bar London" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input placeholder="mikkeller-bar-london" readOnly {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -168,7 +131,10 @@ export function BarDetailsForm({ bar }: BarDetailsFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting || !form.formState.isDirty}
+        >
           {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </form>
