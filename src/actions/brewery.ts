@@ -5,7 +5,9 @@ import { beer, brewery } from "@/db/schema";
 import { geocodeAddress } from "@/lib/maps/geocoding";
 import {
   createBrewerySchema,
+  updateBrewerySchema,
   type CreateBreweryValues,
+  type UpdateBreweryValues,
 } from "@/lib/schemas/brewery";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -114,7 +116,139 @@ export async function createBreweryAction(data: CreateBreweryValues) {
   }
 }
 
-// TODO: Add updateBreweryAction
+type UpdateBreweryData = Omit<UpdateBreweryValues, "slug">;
+
+export async function updateBreweryAction(id: string, data: UpdateBreweryData) {
+  // TODO: Add permission check (e.g., hasAccessToBrewery())
+
+  const validationResult = updateBrewerySchema.safeParse(data);
+  if (!validationResult.success) {
+    return { success: false, error: "Invalid form data submitted." };
+  }
+  const validatedData = validationResult.data;
+
+  try {
+    const currentBrewery = await db.query.brewery.findFirst({
+      where: eq(brewery.id, id),
+    });
+    if (!currentBrewery) {
+      return { success: false, error: "Brewery not found." };
+    }
+
+    let lat = currentBrewery.location?.y;
+    let lng = currentBrewery.location?.x;
+    let formattedAddress = currentBrewery.formattedAddress;
+
+    const addressChanged =
+      validatedData.addressLine1 !== currentBrewery.addressLine1 ||
+      validatedData.addressLine2 !== currentBrewery.addressLine2 ||
+      validatedData.city !== currentBrewery.city ||
+      validatedData.postcode !== currentBrewery.postcode;
+
+    if (
+      addressChanged &&
+      validatedData.addressLine1 &&
+      validatedData.city &&
+      validatedData.postcode
+    ) {
+      try {
+        const geocodeResult = await geocodeAddress({
+          addressLine1: validatedData.addressLine1,
+          addressLine2: validatedData.addressLine2,
+          city: validatedData.city,
+          postcode: validatedData.postcode,
+        });
+        lat = geocodeResult.lat;
+        lng = geocodeResult.lng;
+        formattedAddress = `${validatedData.addressLine1}${validatedData.addressLine2 ? `, ${validatedData.addressLine2}` : ""}, ${validatedData.city}, ${validatedData.postcode}`;
+      } catch (geocodeError) {
+        console.error(
+          "Failed to geocode address during brewery update:",
+          geocodeError
+        );
+        // Decide if you want to fail the whole update or proceed without new coords
+        return { success: false, error: "Failed to geocode new address." };
+      }
+    }
+
+    const [updatedBrewery] = await db
+      .update(brewery)
+      .set({
+        ...validatedData,
+        location:
+          lat && lng ? sql`ST_SetSRID(ST_Point(${lng}, ${lat}), 4326)` : null,
+        formattedAddress: addressChanged
+          ? formattedAddress
+          : currentBrewery.formattedAddress,
+        updatedAt: new Date(),
+      })
+      .where(eq(brewery.id, id))
+      .returning();
+
+    if (!updatedBrewery) {
+      throw new Error("Database failed to return updated brewery.");
+    }
+
+    revalidatePath("/breweries");
+    revalidatePath(`/breweries/${updatedBrewery.slug}`);
+    revalidatePath("/dashboard/brewery"); // Revalidate dashboard path
+
+    return { success: true, data: updatedBrewery };
+  } catch (error) {
+    console.error("Error updating brewery:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to update brewery",
+    };
+  }
+}
+
+type UpdateBreweryImageInput = {
+  breweryId: string;
+  type: "logo" | "cover";
+  path: string;
+};
+
+export async function updateBreweryImageAction({
+  breweryId,
+  type,
+  path,
+}: UpdateBreweryImageInput) {
+  // TODO: Add permission check (e.g., hasAccessToBrewery())
+  try {
+    const updateData = type === "logo" ? { logo: path } : { coverImage: path };
+
+    const [updatedBrewery] = await db
+      .update(brewery)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(brewery.id, breweryId))
+      .returning({ slug: brewery.slug });
+
+    if (!updatedBrewery) {
+      return {
+        success: false,
+        error: "Brewery not found or failed to update.",
+      };
+    }
+
+    revalidatePath("/breweries");
+    revalidatePath(`/breweries/${updatedBrewery.slug}`);
+    revalidatePath("/dashboard/brewery"); // Revalidate dashboard path
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Error updating brewery ${type}:`, error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : `Failed to update brewery ${type}`,
+    };
+  }
+}
+
 // TODO: Add deleteBreweryAction
 
 // --- Search Action ---

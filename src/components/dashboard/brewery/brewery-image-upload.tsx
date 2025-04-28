@@ -1,26 +1,26 @@
 "use client";
 
+import { updateBreweryImageAction } from "@/actions/brewery";
 import { Button } from "@/components/ui/button";
-import { Brewery } from "@/db/schema";
 import { uploadImage } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 type BreweryImageUploadProps = {
-  brewery: Brewery;
+  breweryId: string;
   type: "logo" | "cover";
   className?: string;
 };
 
 export function BreweryImageUpload({
-  brewery,
+  breweryId,
   type,
   className,
 }: BreweryImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
+  const [isUploading, setIsUploading] = useState(false);
 
   return (
     <>
@@ -33,51 +33,59 @@ export function BreweryImageUpload({
           const file = e.target.files?.[0];
           const extension = file?.type.split("/")[1];
           if (file && extension) {
-            const path = `breweries/${brewery.id}/${type}-${Date.now()}.${extension}`;
-            const { data, error } = await uploadImage({
-              bucket: type === "logo" ? "logos" : "covers",
-              file,
-              path,
-            });
+            setIsUploading(true);
+            const path = `breweries/${breweryId}/${type}-${Date.now()}.${extension}`;
+            try {
+              const { data: uploadData, error: uploadError } =
+                await uploadImage({
+                  bucket: type === "logo" ? "logos" : "covers",
+                  file,
+                  path,
+                });
 
-            if (error) {
-              console.error(error);
-              return;
+              if (uploadError || !uploadData) {
+                throw new Error(
+                  uploadError?.message || "Failed to upload image"
+                );
+              }
+
+              const result = await updateBreweryImageAction({
+                breweryId,
+                type,
+                path: uploadData.fullPath,
+              });
+
+              if (!result.success) {
+                throw new Error(
+                  result.error || `Failed to update brewery ${type}`
+                );
+              }
+
+              toast.success(
+                `${type === "logo" ? "Logo" : "Cover image"} updated successfully.`
+              );
+              // No need to invalidate queries, revalidatePath handles it
+            } catch (error) {
+              console.error(`Failed to update brewery ${type}:`, error);
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : `Failed to update ${type}`
+              );
+            } finally {
+              setIsUploading(false);
             }
-
-            const body =
-              type === "logo"
-                ? { logo: data.fullPath }
-                : { coverImage: data.fullPath };
-
-            const response = await fetch(`/api/breweries/${brewery.id}`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(body),
-            });
-
-            if (!response.ok) {
-              console.error("Failed to update brewery");
-              return;
-            }
-
-            // Invalidate the brewery query to trigger a refetch
-            queryClient.invalidateQueries({
-              queryKey: ["breweries", brewery.id],
-            });
           }
         }}
       />
       <Button
-        type="button"
         variant="secondary"
         className={cn(
           "absolute top-0 right-0 size-8 rounded-full border-0",
           className
         )}
         onClick={() => inputRef.current?.click()}
+        disabled={isUploading}
       >
         <Pencil className="size-4" />
       </Button>
