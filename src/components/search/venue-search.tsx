@@ -1,5 +1,8 @@
 "use client";
 
+import { getBar } from "@/actions/bar";
+import { getBreweryAction } from "@/actions/brewery";
+import { searchVenuesAction, type VenueSearchResult } from "@/actions/search";
 import { useDashboard } from "@/components/dashboard/dashboard-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,59 +16,58 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Venue } from "@/db/schema";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown, Hop, Store } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-async function searchVenues(search: string) {
-  if (!search) return [];
-  const response = await fetch(`/api/venues?q=${encodeURIComponent(search)}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch venues");
-  }
-  const data = await response.json();
-  return data.venues as Venue[];
-}
-
-async function getVenue(id: string, type: "bar" | "brewery") {
-  const path = type === "bar" ? "bars" : "breweries";
-  const response = await fetch(`/api/${path}/${id}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${type}`);
-  }
-  const data = await response.json();
-  return data[type] as Venue;
-}
+import { useEffect, useState, useTransition } from "react";
 
 export function VenueSearch() {
   const router = useRouter();
   const { selectedVenue, setSelectedVenue, showVenueSelect } = useDashboard();
   const [open, setOpen] = useState(false);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const [searchResults, setSearchResults] = useState<VenueSearchResult[]>([]);
+  const [initialVenue, setInitialVenue] = useState<VenueSearchResult | null>(
+    null
+  );
 
-  const { data: venues = [] } = useQuery({
-    queryKey: ["venues", debouncedSearch],
-    queryFn: () => searchVenues(debouncedSearch),
-    enabled: debouncedSearch.length > 2,
-  });
+  // Load initial venue if selected
+  useEffect(() => {
+    if (selectedVenue) {
+      startTransition(async () => {
+        if (selectedVenue.type === "bar") {
+          const result = await getBar(selectedVenue.id);
+          if (result) {
+            setInitialVenue({ ...result, type: "bar" });
+          }
+        } else {
+          const result = await getBreweryAction(selectedVenue.id);
+          if (result.success && result.data) {
+            setInitialVenue({ ...result.data, type: "brewery" });
+          }
+        }
+      });
+    }
+  }, [selectedVenue]);
 
-  const { data: venue } = useQuery({
-    queryKey: ["venue", selectedVenue],
-    queryFn: () =>
-      selectedVenue ? getVenue(selectedVenue.id, selectedVenue.type) : null,
-    enabled: !!selectedVenue,
-  });
+  const runSearch = async (query: string) => {
+    if (query.length < 2) return;
+
+    const result = await searchVenuesAction(query);
+    if (result.success && result.data) {
+      setSearchResults(result.data);
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   const setSearchDebouncer = useAsyncDebouncer(
-    (value: string) => {
-      setDebouncedSearch(value);
+    async (value: string) => {
+      startTransition(() => {
+        runSearch(value);
+      });
     },
-    {
-      wait: 300,
-    }
+    { wait: 300 }
   );
 
   useEffect(() => {
@@ -78,7 +80,7 @@ export function VenueSearch() {
   // Don't render if venue select should be hidden
   if (!showVenueSelect) return null;
 
-  const handleVenueSelect = (venue: Venue | null) => {
+  const handleVenueSelect = (venue: VenueSearchResult | null) => {
     setSelectedVenue(venue);
     setOpen(false);
 
@@ -95,6 +97,12 @@ export function VenueSearch() {
     router.refresh();
   };
 
+  const displayName = selectedVenue
+    ? (searchResults.find((v) => v.id === selectedVenue.id)?.name ??
+      initialVenue?.name ??
+      "Loading...")
+    : "Select venue...";
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -103,6 +111,7 @@ export function VenueSearch() {
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between shadow-none"
+          disabled={isPending}
         >
           <div className="flex min-w-0 items-center gap-2">
             <div className="bg-foreground text-background shrink-0 rounded-sm p-1">
@@ -112,13 +121,7 @@ export function VenueSearch() {
                 <Store className="size-4" />
               )}
             </div>
-            <span className="truncate">
-              {selectedVenue
-                ? (venue?.name ??
-                  venues.find((v) => v.id === selectedVenue.id)?.name ??
-                  "Loading...")
-                : "Select venue..."}
-            </span>
+            <span className="truncate">{displayName}</span>
           </div>
           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
@@ -132,7 +135,7 @@ export function VenueSearch() {
             }}
           />
           <CommandList>
-            {venues.map((venue) => (
+            {searchResults.map((venue) => (
               <CommandItem
                 key={`${venue.type}-${venue.id}`}
                 value={venue.id}

@@ -88,7 +88,7 @@ export function ImageUploadInput({
       )}
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         size="icon"
         className="absolute right-2 bottom-2 size-8 rounded-full border-0"
         onClick={() => inputRef.current?.click()}

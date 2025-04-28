@@ -1,4 +1,4 @@
-import { getBrewery } from "@/lib/breweries";
+import { getBreweryAction } from "@/actions/brewery";
 import { notFound } from "next/navigation";
 
 export default async function BreweryPage({
@@ -7,9 +7,10 @@ export default async function BreweryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const breweryData = await getBrewery(id);
+  const { success, data: breweryData, error } = await getBreweryAction(id);
 
-  if (!breweryData) {
+  if (!success || !breweryData) {
+    console.error("Failed to load brewery page:", error);
     notFound();
   }
 

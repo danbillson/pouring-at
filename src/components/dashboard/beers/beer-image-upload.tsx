@@ -65,7 +65,7 @@ export function BeerImageUpload({ beerId, className }: BeerImageUploadProps) {
       />
       <Button
         type="button"
-        variant="outline"
+        variant="secondary"
         className={cn(
           "absolute right-2 bottom-2 size-8 rounded-full border-0",
           className

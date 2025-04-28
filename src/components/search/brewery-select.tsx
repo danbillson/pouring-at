@@ -1,5 +1,6 @@
 "use client";
 
+import { getBreweryAction, searchBreweriesAction } from "@/actions/brewery";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -13,12 +14,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Brewery } from "@/lib/breweries";
 import { cn } from "@/lib/utils";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronsUpDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface BrewerySearchProps {
   value?: string;
@@ -26,52 +25,52 @@ interface BrewerySearchProps {
   onChange: (value: string | null) => void;
 }
 
-async function searchBreweries(search: string) {
-  if (!search) return [];
-  const response = await fetch(
-    `/api/breweries/search?q=${encodeURIComponent(search)}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch breweries");
-  }
-  const data = await response.json();
-  return data.breweries as Brewery[];
-}
-
-async function getBrewery(slug: string) {
-  const response = await fetch(`/api/breweries/${slug}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch brewery");
-  }
-  const data = await response.json();
-  return data.brewery as Brewery;
+interface SearchedBrewery {
+  id: string;
+  name: string;
+  slug: string | null;
 }
 
 // The BrewerySelect component is used to search for breweries by slug without
 // the option to create a new brewery.
 export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
   const [open, setOpen] = useState(false);
-  const [debouncedSearch, setDebouncedSearch] = useState(name || "");
+  const [isPending, startTransition] = useTransition();
+  const [searchResults, setSearchResults] = useState<SearchedBrewery[]>([]);
+  const [selectedBrewery, setSelectedBrewery] =
+    useState<SearchedBrewery | null>(null);
 
-  const { data: breweries = [] } = useQuery({
-    queryKey: ["breweries", debouncedSearch],
-    queryFn: () => searchBreweries(debouncedSearch),
-    enabled: debouncedSearch.length > 0,
-  });
+  // Load initial brewery if value is provided
+  useEffect(() => {
+    if (value) {
+      startTransition(async () => {
+        const result = await getBreweryAction(value);
+        if (result.success && result.data) {
+          const { id, name, slug } = result.data;
+          setSelectedBrewery({ id, name, slug });
+        }
+      });
+    }
+  }, [value]);
 
-  const { data: selectedBrewery } = useQuery({
-    queryKey: ["brewery", value],
-    queryFn: () => getBrewery(value!),
-    enabled: !!value,
-  });
+  const runSearch = async (query: string) => {
+    const result = await searchBreweriesAction(query);
+    if (result.success && result.data) {
+      setSearchResults(
+        result.data.map(({ id, name, slug }) => ({ id, name, slug }))
+      );
+    } else {
+      setSearchResults([]);
+    }
+  };
 
   const setSearchDebouncer = useAsyncDebouncer(
-    (value: string) => {
-      setDebouncedSearch(value);
+    async (value: string) => {
+      startTransition(() => {
+        runSearch(value);
+      });
     },
-    {
-      wait: 300,
-    }
+    { wait: 300 }
   );
 
   useEffect(() => {
@@ -92,10 +91,11 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
             "w-full justify-between font-normal",
             !value && "text-muted-foreground hover:text-muted-foreground"
           )}
+          disabled={isPending}
         >
           {value
             ? (selectedBrewery?.name ??
-              breweries.find((brewery) => brewery.id === value)?.name ??
+              searchResults.find((brewery) => brewery.id === value)?.name ??
               name ??
               "Loading...")
             : "Brewery"}
@@ -104,7 +104,6 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
         <Command shouldFilter={false}>
-          <CommandEmpty>No breweries found.</CommandEmpty>
           <CommandInput
             placeholder="Search breweries..."
             onValueChange={(value) => {
@@ -112,7 +111,8 @@ export function BrewerySelect({ value, name, onChange }: BrewerySearchProps) {
             }}
           />
           <CommandList>
-            {breweries.map((brewery) => (
+            <CommandEmpty>No breweries found.</CommandEmpty>
+            {searchResults.map((brewery) => (
               <CommandItem
                 key={brewery.id}
                 value={brewery.id}

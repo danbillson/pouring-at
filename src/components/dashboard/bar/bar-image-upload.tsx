@@ -76,7 +76,7 @@ export function BarImageUpload({
         }}
       />
       <Button
-        variant="outline"
+        variant="secondary"
         className={cn(
           "absolute top-0 right-0 size-8 rounded-full border-0",
           className

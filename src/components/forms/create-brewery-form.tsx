@@ -1,5 +1,6 @@
 "use client";
 
+import { createBreweryAction } from "@/actions/brewery";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,26 +11,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createBrewery } from "@/lib/breweries";
+import {
+  createBrewerySchema,
+  type CreateBreweryValues,
+} from "@/lib/schemas/brewery";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
-
-const createBrewerySchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  addressLine1: z.string().min(1, "Address is required"),
-  addressLine2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  postcode: z
-    .string()
-    .min(1, "Postcode is required")
-    .regex(/^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i, {
-      message: "Invalid UK postcode format",
-    }),
-});
-
-type CreateBreweryValues = z.infer<typeof createBrewerySchema>;
 
 interface CreateBreweryFormProps {
   onSuccess?: (breweryId: string) => void;
@@ -53,14 +41,17 @@ export function CreateBreweryForm({
 
   async function onSubmit(data: CreateBreweryValues) {
     try {
-      const result = await createBrewery(data);
+      const result = await createBreweryAction(data);
 
       if (!result.success || !result.data) {
-        throw new Error(result.error);
+        throw new Error(
+          result.error || "Server returned failure without error message."
+        );
       }
 
       toast.success("Brewery created successfully");
       onSuccess?.(result.data.id);
+      form.reset();
     } catch (error) {
       console.error("Failed to create brewery:", error);
       toast.error(

@@ -1,11 +1,8 @@
-"use client";
-
 import { BreweryDetailsForm } from "@/components/dashboard/brewery/brewery-details-form";
 import { BreweryImageUpload } from "@/components/dashboard/brewery/brewery-image-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Brewery } from "@/db/schema";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
 const storageUrl = process.env.NEXT_PUBLIC_STORAGE_URL!;
@@ -14,18 +11,10 @@ type BreweryDetailsProps = {
   brewery: Brewery;
 };
 
-export function BreweryDetails({
-  brewery: initialBrewery,
-}: BreweryDetailsProps) {
-  const {
-    data: { brewery },
-  } = useQuery({
-    queryKey: ["breweries", initialBrewery.id],
-    queryFn: () =>
-      fetch(`/api/breweries/${initialBrewery.id}`).then((res) => res.json()),
-    initialData: { brewery: initialBrewery },
-  });
-
+export function BreweryDetails({ brewery }: BreweryDetailsProps) {
+  if (!brewery) {
+    return <div>Brewery data not found.</div>;
+  }
   return (
     <div className="grid gap-8">
       <div>
@@ -37,6 +26,7 @@ export function BreweryDetails({
               alt={`${brewery.name} cover`}
               className="h-full w-full rounded-lg object-cover"
               fill
+              priority
             />
           ) : (
             <div className="flex h-full items-center justify-center">
@@ -44,9 +34,9 @@ export function BreweryDetails({
             </div>
           )}
           <BreweryImageUpload
-            brewery={brewery}
+            breweryId={brewery.id}
             type="cover"
-            className="top-[unset] -right-2 -bottom-2 size-12"
+            className="top-[unset] right-2 bottom-2 size-12"
           />
         </div>
       </div>
@@ -55,12 +45,14 @@ export function BreweryDetails({
         <p className="text-muted-foreground mb-4 text-sm">Logo</p>
         <div className="relative w-fit">
           <Avatar className="size-24">
-            <AvatarImage src={`${storageUrl}/${brewery.logo}`} />
+            <AvatarImage
+              src={brewery.logo ? `${storageUrl}/${brewery.logo}` : undefined}
+            />
             <AvatarFallback className="bg-foreground text-background text-2xl uppercase">
-              {brewery.name?.charAt(0)}
+              {brewery.name?.charAt(0) || "?"}
             </AvatarFallback>
           </Avatar>
-          <BreweryImageUpload brewery={brewery} type="logo" />
+          <BreweryImageUpload breweryId={brewery.id} type="logo" />
         </div>
       </div>
 
