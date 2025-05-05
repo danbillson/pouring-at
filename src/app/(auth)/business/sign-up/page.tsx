@@ -15,11 +15,8 @@ export default function SignUpPage() {
           </div>
           pouring.at business
         </Link>
-        <SignUpForm />
+        <SignUpForm isBusiness />
       </div>
-      <Link href="/sign-up" className="text-sm text-muted-foreground underline">
-        Not a business? Sign up as a regular user
-      </Link>
     </div>
   );
 }

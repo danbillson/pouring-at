@@ -22,17 +22,17 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const isAdmin = session.user.role === "admin";
+  const isSuperadmin = session.user.role === "superadmin";
 
   // Get available venues based on role
   const [bars, breweries] = await Promise.all([
     db.query.bar.findMany({
-      where: isAdmin
+      where: isSuperadmin
         ? undefined
         : eq(bar.organizationId, session.session.activeOrganizationId ?? ""),
     }),
     db.query.brewery.findMany({
-      where: isAdmin
+      where: isSuperadmin
         ? undefined
         : eq(
             brewery.organizationId,
@@ -61,15 +61,15 @@ export default async function DashboardLayout({
     }
   }
 
-  // Auto-select if user has only one venue and isn't admin
-  if (!defaultVenue && availableVenues.length === 1 && !isAdmin) {
+  // Auto-select if user has only one venue and isn't superadmin
+  if (!defaultVenue && availableVenues.length === 1 && !isSuperadmin) {
     defaultVenue = availableVenues[0];
   }
 
   return (
     <DashboardProvider
       defaultVenue={defaultVenue}
-      isAdmin={isAdmin}
+      isSuperadmin={isSuperadmin}
       availableVenues={availableVenues}
     >
       <SidebarProvider>

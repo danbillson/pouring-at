@@ -26,13 +26,13 @@ export async function hasAccessToBar() {
     where: eq(memberSchema.userId, session.user.id),
   });
 
-  if (!userMember && session.user.role !== "admin") {
+  if (!userMember && session.user.role !== "superadmin") {
     redirect("/dashboard");
   }
 
   const userBar = await db.query.bar.findFirst({
     where:
-      session.user.role === "admin"
+      session.user.role === "superadmin"
         ? eq(bar.id, barId)
         : and(
             eq(bar.organizationId, userMember?.organizationId ?? ""),
@@ -68,13 +68,13 @@ export async function hasAccessToBrewery() {
     where: eq(memberSchema.userId, session.user.id),
   });
 
-  if (!userMember && session.user.role !== "admin") {
+  if (!userMember && session.user.role !== "superadmin") {
     redirect("/dashboard");
   }
 
   const userBrewery = await db.query.brewery.findFirst({
     where:
-      session.user.role === "admin"
+      session.user.role === "superadmin"
         ? eq(brewery.id, breweryId)
         : and(
             eq(brewery.organizationId, userMember?.organizationId ?? ""),

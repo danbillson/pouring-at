@@ -17,22 +17,22 @@ const DashboardContext = createContext<DashboardContextType | null>(null);
 
 interface DashboardProviderProps {
   defaultVenue?: Venue | null;
-  isAdmin?: boolean;
+  isSuperadmin?: boolean;
   availableVenues: Venue[];
   children: React.ReactNode;
 }
 
 export function DashboardProvider({
   defaultVenue,
-  isAdmin = false,
+  isSuperadmin = false,
   availableVenues = [],
   children,
 }: DashboardProviderProps) {
   const [selectedVenue, setSelectedVenueState] = useState(defaultVenue ?? null);
 
-  const isStandardUser = !isAdmin && availableVenues.length === 0;
-  // Only show venue select if user is admin OR has access to multiple venues
-  const showVenueSelect = isAdmin || availableVenues.length > 1;
+  const isStandardUser = !isSuperadmin && availableVenues.length === 0;
+  // Only show venue select if user is superadmin OR has access to multiple venues
+  const showVenueSelect = isSuperadmin || availableVenues.length > 1;
 
   const setSelectedVenue = useCallback((venue: Venue | null) => {
     setSelectedVenueState(venue);

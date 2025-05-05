@@ -1,5 +1,6 @@
 "use client";
 
+import { EmailExists } from "@/components/forms/already-exists";
 import { VerifyEmail } from "@/components/forms/verify-email";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,9 +43,14 @@ const signUpSchema = z.object({
 
 type SignUpValues = z.infer<typeof signUpSchema>;
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  isBusiness?: boolean;
+};
+
+export function SignUpForm({ isBusiness = false }: SignUpFormProps) {
   const [error, setError] = useState<string>();
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
 
   const form = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -58,12 +64,22 @@ export function SignUpForm() {
   async function onSubmit({ email, password, username }: SignUpValues) {
     try {
       setError(undefined);
-      await signUp.email({
+      const res = await signUp.email({
         email,
         password,
         name: username,
-        callbackURL: "/",
+        role: isBusiness ? "business" : "user",
+        callbackURL: isBusiness ? "/dashboard/setup" : "/",
       });
+      if (res.error?.code === "USER_ALREADY_EXISTS") {
+        setEmailExists(true);
+      }
+
+      if (!res.data?.user.id) {
+        setError("Something went wrong. Please try again.");
+        return;
+      }
+
       setHasSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -73,7 +89,11 @@ export function SignUpForm() {
   if (hasSubmitted) {
     return (
       <>
-        <VerifyEmail email={form.getValues("email")} />
+        {emailExists ? (
+          <EmailExists email={form.getValues("email")} />
+        ) : (
+          <VerifyEmail email={form.getValues("email")} />
+        )}
         <Button
           variant="ghost"
           onClick={() => setHasSubmitted(false)}
@@ -87,82 +107,93 @@ export function SignUpForm() {
   }
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle className="text-xl">Create an account</CardTitle>
-        <CardDescription>
-          Enter your details below to create your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="johndoe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="john@example.com"
-                        type="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="••••••••"
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {error && <div className="text-destructive text-sm">{error}</div>}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={form.formState.isSubmitting}
-            >
-              Sign up
-            </Button>
-            <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link href="/user-flow" className="underline underline-offset-4">
-                Login
-              </Link>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Create an account</CardTitle>
+          <CardDescription>
+            Enter your details below to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="johndoe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="john@example.com"
+                          type="email"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="••••••••"
+                          type="password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {error && <div className="text-destructive text-sm">{error}</div>}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
+                Sign up
+              </Button>
+              <div className="text-center text-sm">
+                Already have an account?{" "}
+                <Link
+                  href="/user-flow"
+                  className="underline underline-offset-4"
+                >
+                  Login
+                </Link>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      <Link
+        href="/sign-up"
+        className="text-muted-foreground text-center text-sm underline"
+      >
+        Not a business? Sign up as a regular user
+      </Link>
+    </>
   );
 }
