@@ -13,15 +13,12 @@ export default function SignUpPage() {
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
             <Beer className="size-4" />
           </div>
-          pouring.at
+          pouring.at business
         </Link>
         <SignUpForm />
       </div>
-      <Link
-        href="/business/sign-up"
-        className="text-sm text-muted-foreground underline"
-      >
-        Have a business account? Sign up here
+      <Link href="/sign-up" className="text-sm text-muted-foreground underline">
+        Not a business? Sign up as a regular user
       </Link>
     </div>
   );

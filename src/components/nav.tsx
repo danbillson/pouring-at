@@ -29,7 +29,7 @@ export async function Nav() {
         </Button>
       ) : (
         <Button variant="default" asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/user-flow">Login</Link>
         </Button>
       )}
     </nav>
