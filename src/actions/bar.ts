@@ -10,7 +10,7 @@ import {
   type CreateBarValues,
   type UpdateBarValues,
 } from "@/lib/schemas/bar";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, ilike, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // --- Fetching Helpers ---
@@ -124,6 +124,32 @@ export async function searchBars({
   `;
 
   return db.execute(nearbyBarsQuery);
+}
+
+// --- Name-based Bar Search (for BarSearch component) ---
+export async function queryBars(query: string) {
+  if (!query || query.length < 1) {
+    return { success: true, data: [] };
+  }
+  try {
+    const searchTerms = query.split(" ").filter(Boolean);
+    const nameConditions = searchTerms.map((term) =>
+      ilike(bar.name, `%${term}%`)
+    );
+    const bars = await db.query.bar.findMany({
+      where: and(...nameConditions),
+      columns: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+      limit: 10,
+    });
+    return { success: true, data: bars };
+  } catch (error) {
+    console.error("Error querying bars by name:", error);
+    return { success: false, error: "Failed to search bars." };
+  }
 }
 
 // --- Mutation Actions ---
