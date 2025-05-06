@@ -1,5 +1,5 @@
 import { AddTap } from "@/components/add-tap";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { getTaps } from "@/lib/taps";
 import { Beer } from "lucide-react";
 import { headers } from "next/headers";

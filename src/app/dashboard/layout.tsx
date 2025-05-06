@@ -3,7 +3,7 @@ import { DashboardProvider } from "@/components/dashboard/dashboard-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { db } from "@/db";
 import { bar, brewery, type Venue } from "@/db/schema";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
