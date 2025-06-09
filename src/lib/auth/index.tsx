@@ -1,5 +1,13 @@
 import { db } from "@/db";
-import { account, session, user, verification } from "@/db/schema";
+import {
+  account,
+  invitation,
+  member,
+  organization as organizationSchema,
+  session,
+  user,
+  verification,
+} from "@/db/schema";
 import { VerifyEmail } from "@/emails/verify-email";
 import { sendEmail } from "@/lib/email";
 import { betterAuth } from "better-auth";
@@ -11,6 +19,9 @@ const schema = {
   account,
   session,
   verification,
+  organization: organizationSchema,
+  member,
+  invitation,
 };
 
 export const auth = betterAuth({

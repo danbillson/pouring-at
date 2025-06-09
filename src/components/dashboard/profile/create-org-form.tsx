@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { organization } from "@/lib/auth/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,32 +27,29 @@ const orgSchema = z.object({
 
 type OrgValues = z.infer<typeof orgSchema>;
 
-type CreateOrgFormProps = {
-  onSuccess?: (org: any) => void;
-};
-
-export function CreateOrgForm({ onSuccess }: CreateOrgFormProps) {
+export function CreateOrgForm() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [slugExists, setSlugExists] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const form = useForm<OrgValues>({
     resolver: zodResolver(orgSchema),
     defaultValues: { name: "", slug: "" },
   });
 
-  async function onSubmit(data: OrgValues) {
+  function onSubmit(data: OrgValues) {
     setError(null);
-    setLoading(true);
-    try {
-      const org = await organization.create({
-        name: data.name,
-        slug: data.slug,
-      });
-      onSuccess?.(org);
-    } catch (e: any) {
-      setError(e?.message || "Failed to create organization");
-    } finally {
-      setLoading(false);
-    }
+    startTransition(async () => {
+      try {
+        const org = await organization.create({
+          name: data.name,
+          slug: data.slug,
+        });
+        router.push("/dashboard");
+      } catch (e: any) {
+        setError(e?.message || "Failed to create organization");
+      }
+    });
   }
 
   return (
@@ -77,9 +75,21 @@ export function CreateOrgForm({ onSuccess }: CreateOrgFormProps) {
             <FormItem>
               <FormLabel>Choose a slug for your organization</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  onBlur={async () => {
+                    const { data } = await organization.checkSlug({
+                      slug: field.value,
+                    });
+                    setSlugExists(data?.status !== true);
+                  }}
+                />
               </FormControl>
-              <FormMessage />
+              {slugExists && (
+                <FormMessage>
+                  This slug is already taken. Please choose another one.
+                </FormMessage>
+              )}
             </FormItem>
           )}
         />
@@ -87,9 +97,9 @@ export function CreateOrgForm({ onSuccess }: CreateOrgFormProps) {
         <Button
           type="submit"
           className="w-full"
-          disabled={loading || form.formState.isSubmitting}
+          disabled={isPending || form.formState.isSubmitting}
         >
-          {loading ? "Creating..." : "Create Organization"}
+          {isPending ? "Creating..." : "Create Organization"}
         </Button>
       </form>
     </Form>
