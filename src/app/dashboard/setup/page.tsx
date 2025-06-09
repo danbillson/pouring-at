@@ -27,8 +27,8 @@ export default async function SetupPage() {
             {session?.user?.name ? `Welcome ${session.user.name}` : "Welcome"}
           </CardTitle>
           <CardDescription>
-            Let's set up your organization. This is where you'll be able to add
-            your team members and manage your venues.
+            Let&apos;s set up your organization. This is where you&apos;ll be
+            able to add your team members and manage your venues.
           </CardDescription>
         </CardHeader>
         <CardContent>

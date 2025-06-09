@@ -41,13 +41,15 @@ export function CreateOrgForm() {
     setError(null);
     startTransition(async () => {
       try {
-        const org = await organization.create({
+        await organization.create({
           name: data.name,
           slug: data.slug,
         });
         router.push("/dashboard");
-      } catch (e: any) {
-        setError(e?.message || "Failed to create organization");
+      } catch (e: unknown) {
+        setError(
+          e instanceof Error ? e.message : "Failed to create organization"
+        );
       }
     });
   }

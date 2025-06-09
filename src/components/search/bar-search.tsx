@@ -13,8 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { db } from "@/db";
-import { bar } from "@/db/schema";
 import { useAsyncDebouncer } from "@tanstack/react-pacer/async-debouncer";
 import { ChevronsUpDown, Plus } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
