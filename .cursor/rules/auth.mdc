@@ -1,0 +1,88 @@
+---
+description: 
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+# Auth rules (Better Auth)
+
+- Use [Better Auth](https://www.better-auth.com/) for all authentication and authorization logic.
+- All auth logic should be centralized in `lib/auth.ts` or `src/lib/auth/`.
+- Do not expose sensitive auth logic in client components.
+- Use the Better Auth organization plugin for multi-tenant org/member/role management.
+
+## Server Actions & Session Handling
+
+- **All authentication mutations (sign up, sign in, sign out, password reset, etc.) must use Server Actions.**
+  - Place all server actions in `src/actions/`.
+  - Use `'use server'` directive at the top of server action files.
+- **Never use API routes for internal auth logic.**
+  - Only use `/api` routes for true external APIs (webhooks, 3rd party integrations).
+- **Get session data on the server using Better Auth's `auth.api.getSession` and Next.js `headers()`.**
+
+  - Example:
+
+    ```ts
+    import { auth } from "@/lib/auth";
+    import { headers } from "next/headers";
+
+    const session = await auth.api.getSession({ headers: await headers() });
+    ```
+
+- **For server actions that need to set cookies (e.g., sign in), use the `nextCookies` plugin in your Better Auth config.**
+  - This ensures cookies are set automatically from server actions.
+
+## Client/Server Separation
+
+- **Use the Better Auth client only for UI state and session hooks.**
+  - Use `useSession` from the auth client for reactive session state in client components.
+  - All sensitive mutations must go through server actions.
+- **Never call server-only auth APIs from the client.**
+  - Only use the client for sign-in, sign-out, and session state.
+
+## Middleware & Route Protection
+
+- **Use Next.js middleware to protect routes by checking for the session cookie.**
+
+  - Use `getSessionCookie` from Better Auth for fast checks (no DB call).
+  - Example:
+
+    ```ts
+    import { getSessionCookie } from "better-auth/cookies";
+    import { NextRequest, NextResponse } from "next/server";
+
+    export async function middleware(request: NextRequest) {
+      const sessionCookie = getSessionCookie(request);
+      if (!sessionCookie) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+      return NextResponse.next();
+    }
+    export const config = { matcher: ["/dashboard"] };
+    ```
+
+## Organization & Roles
+
+- **Use the Better Auth organization plugin for all org/member/role management.**
+  - Do not store org membership or roles directly on the user; always use the plugin's tables and APIs.
+- **Assign roles (admin, member, etc.) via the organization plugin, not via a user field.**
+- **For platform-level roles (e.g., superadmin), use an additional field on the user schema.**
+
+## Social & Password Auth
+
+- **Use Better Auth's built-in methods for email/password and social login.**
+  - Use `signUp.email`, `signIn.email`, and `signIn.social` from the auth client for client-side flows.
+  - Use server actions for any sensitive flows or custom logic.
+
+## Email Verification & Security
+
+- **Enable email verification for all sign-ups.**
+  - Use `sendOnSignUp: true` and `requireEmailVerification: true` in your config.
+- **Handle verification and password reset flows via server actions and Better Auth's built-in APIs.**
+
+## Summary
+
+- **All auth mutations and sensitive logic go through server actions, never API routes.**
+- **Session checks and user data fetching are done server-side using Better Auth and Next.js headers.**
+- **Use the organization plugin for all org/member/role logic.**
+- **Protect routes with middleware using session cookies, not DB calls.**
+- **Keep client code for UI and session state only.**

@@ -1,6 +1,6 @@
 import { LocationInput } from "@/components/search/location-input";
 import { Button } from "@/components/ui/button";
-import { auth } from "@/lib/auth/auth";
+import { auth } from "@/lib/auth";
 import { User } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -29,7 +29,7 @@ export async function Nav() {
         </Button>
       ) : (
         <Button variant="default" asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/user-flow">Login</Link>
         </Button>
       )}
     </nav>

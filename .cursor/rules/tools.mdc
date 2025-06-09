@@ -1,7 +1,7 @@
 ---
 description: 
-globs: *.ts*,*.css
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 # Technology Stack
 

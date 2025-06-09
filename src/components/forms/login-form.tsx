@@ -32,7 +32,11 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+type LoginFormProps = {
+  isBusiness?: boolean;
+};
+
+export function LoginForm({ isBusiness = false }: LoginFormProps) {
   const router = useRouter();
   const [error, setError] = useState<string>();
 
@@ -135,7 +139,10 @@ export function LoginForm() {
             </Button>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/sign-up" className="underline underline-offset-4">
+              <Link
+                href={isBusiness ? "/business/sign-up" : "/sign-up"}
+                className="underline underline-offset-4"
+              >
                 Sign up
               </Link>
             </div>

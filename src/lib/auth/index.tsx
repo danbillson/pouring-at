@@ -1,22 +1,27 @@
 import { db } from "@/db";
-import { account, session, user, verification } from "@/db/schema";
-import { VerifyEmail } from "@/emails/verify-email";
 import {
-  ac,
-  admin,
+  account,
+  invitation,
   member,
-  user as userPermissions,
-} from "@/lib/auth/permissions";
+  organization as organizationSchema,
+  session,
+  user,
+  verification,
+} from "@/db/schema";
+import { VerifyEmail } from "@/emails/verify-email";
 import { sendEmail } from "@/lib/email";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin as adminPlugin, organization } from "better-auth/plugins";
+import { organization } from "better-auth/plugins";
 
 const schema = {
   user,
   account,
   session,
   verification,
+  organization: organizationSchema,
+  member,
+  invitation,
 };
 
 export const auth = betterAuth({
@@ -39,15 +44,13 @@ export const auth = betterAuth({
       });
     },
   },
-  plugins: [
-    organization(),
-    adminPlugin({
-      ac,
-      roles: {
-        admin,
-        member,
-        user: userPermissions,
+  plugins: [organization()],
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        default: "user",
       },
-    }),
-  ],
+    },
+  },
 });

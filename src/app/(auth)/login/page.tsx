@@ -17,6 +17,12 @@ export default function LoginPage() {
         </Link>
         <LoginForm />
       </div>
+      <Link
+        href="/business/login"
+        className="text-sm text-muted-foreground underline"
+      >
+        Have a business account? Login here
+      </Link>
     </div>
   );
 }
